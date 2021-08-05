@@ -1,0 +1,49 @@
+{
+  "name": "tree-diff",
+  "version": "1.0.0",
+  "description": "compare 2 trees differences",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@babel/core": "^7.14.8",
+    "babel-loader": "^8.2.2",
+    "deep-equal": "^2.0.5",
+    "deepcopy": "^2.1.0",
+    "immutable": "^4.0.0-rc.14",
+    "list-diff2": "^0.1.4"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@types/node": "^16.4.1",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^27.0.6",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-component": "^1.1.1",
+    "babel-preset-env": "^1.7.0",
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "html-webpack-plugin": "^5.3.2",
+    "html-webpack-template": "^6.2.0",
+    "object-sizeof": "^1.6.1",
+    "source-map-loader": "^3.0.0",
+    "typescript": "^4.3.5",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^5.48.0",
+    "webpack-cli": "^4.7.2"
+  },
+  "scripts": {
+    "test": "webpack && jest && node test.js",
+    "build": "webpack"
+  },
+  "keywords": [
+    "tree-diff",
+    "immutable"
+  ],
+  "author": "wuhao",
+  "license": "ISC",
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  }
+}
