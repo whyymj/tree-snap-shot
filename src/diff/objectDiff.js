@@ -42,6 +42,7 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parent
         });
     } else {
         if (isPrimitive(obj1) || isPrimitive(obj2)) { //基本数据类型
+            console.log(obj1 , obj2 ,'<<<<+++<')
             if (obj1 !== obj2) {
                 resultObj.push({
                     path,
@@ -90,6 +91,7 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parent
                                         to: deepClone(obj2.get(key)),
                                     }
                                 });
+                            console.log(obj1.get(key), obj2.get(key) ,'<<<<<',resultObj)
                             }
                         } else {
                             resultObj.push({

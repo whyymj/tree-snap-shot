@@ -100,11 +100,11 @@ function getRes(snakes, stra, strb) {
 
         if (index === 0 && s !== 0) { //不变的值
             for (let j = 0; j < s; j++) {
-                args.push({
-                    operation: '',
-                    value: stra[j],
-                    index: [j, yOffset]
-                })
+                // args.push({
+                //     operation: '',
+                //     value: stra[j],
+                //     index: [j, yOffset]
+                // })
                 yOffset++
             }
         }
@@ -129,11 +129,11 @@ function getRes(snakes, stra, strb) {
 
         // 不变
         for (let i = 0; i < e - large; i++) {
-            args.push({
-                operation: '',
-                value: stra[large + i],
-                index: [large + i, yOffset],
-            })
+            // args.push({
+            //     operation: '',
+            //     value: stra[large + i],
+            //     index: [large + i, yOffset],
+            // })
             yOffset++
         }
     })
@@ -162,7 +162,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = []
         resultObj.push({
             path,
             type,
-            operation: 'diff',
+            operation: 'myers-diff',
             value: diff
         });
         if (typeof handler == 'function') {

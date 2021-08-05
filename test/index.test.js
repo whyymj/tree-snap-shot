@@ -2,7 +2,6 @@ import {
   diff
 } from '../dist/index'
 
-
 test('diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])', () => {
   expect(diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])).toEqual([{
     "path": [],

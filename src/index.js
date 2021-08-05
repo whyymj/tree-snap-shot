@@ -1,5 +1,5 @@
 import {
-    objectDiff
+    objectDiffHandler as objectDiff
 } from './diff/objectDiff.js'
 import {
     myersDiffHandler as arrayDiff
@@ -22,7 +22,7 @@ function differs(data1, data2, path, type, resultObj, parents, handler) {
 
 function diff(data1, data2, path = []) {
     let result = [];
-    differs(data1, data2, Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs)
+    differs(data1, data2, Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs);
     return Immutable.fromJS(result).toJS();
 }
 
@@ -36,4 +36,4 @@ function diff(data1, data2, path = []) {
     }
     exports.default = TreeDiff;
     exports.diff = diff
-}))) 
+})))
