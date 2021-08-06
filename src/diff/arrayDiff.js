@@ -3,7 +3,7 @@ import {
     getDataType
 } from '../util/index.js'
 import Immutable from 'immutable'
-import deepEqual from 'deep-equal'
+import {deepEqual} from '../util/equal.js'
 
 function myers(stra, strb, equal = (a, b) => a === b) {
     let n = stra.length;
@@ -163,7 +163,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = []
             path,
             type,
             operation: 'myers-diff',
-            value: diff
+            steps: diff
         });
         if (typeof handler == 'function') {
             diff.forEach((item) => {

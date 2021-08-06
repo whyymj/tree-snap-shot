@@ -6,19 +6,11 @@ test('diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])', () => {
   expect(diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])).toEqual([{
     "path": [],
     "type": [],
-    "operation": "diff",
-    "value": [{
+    "operation": "myers-diff",
+    "steps": [{
       "operation": "add",
       "value": 0,
       "index": [0, 0]
-    }, {
-      "operation": "",
-      "value": 1,
-      "index": [0, 1]
-    }, {
-      "operation": "",
-      "value": 2,
-      "index": [1, 2]
     }, {
       "operation": "del",
       "value": 4,
@@ -32,13 +24,66 @@ test('diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])', () => {
       "value": 5,
       "index": [3, 4]
     }, {
-      "operation": "",
-      "value": 3,
-      "index": [3, 5]
-    }, {
       "operation": "add",
       "value": 4,
       "index": [4, 6]
+    }]
+  }]);
+});
+
+test('diff(obj1, obj2)', () => {
+  let data1 = {
+    id: 'data1-id',
+    name: 'data1-name',
+    children: [{
+      id: 'child1-id',
+      name: 'child1-name',
+    }, {
+      id: 'child2-id',
+      name: 'child2-name',
+    }]
+  }
+  let data2 = {
+    id: 'data2-id',
+    name: 'data2-name',
+    children: [{
+      id: 'child1-id',
+      name: 'child1-name',
+    }, {
+      id: 'child2-id',
+      name: 'child2-name',
+    }, {
+      id: 'child3-id',
+      name: 'child2-name',
+    }]
+  }
+  expect(diff(data1, data2)).toEqual([{
+    "path": ["id"],
+    "operation": "update",
+    "type": ["object"],
+    "value": {
+      "from": "data1-id",
+      "to": "data2-id"
+    }
+  }, {
+    "path": ["name"],
+    "operation": "update",
+    "type": ["object"],
+    "value": {
+      "from": "data1-name",
+      "to": "data2-name"
+    }
+  }, {
+    "path": ["children"],
+    "type": ["object"],
+    "operation": "myers-diff",
+    "steps": [{
+      "operation": "add",
+      "value": {
+        "id": "child3-id",
+        "name": "child2-name"
+      },
+      "index": [2, 2]
     }]
   }]);
 });

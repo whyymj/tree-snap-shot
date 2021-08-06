@@ -1,13 +1,15 @@
 import Immutable from "immutable"
-import isObject from "isobject"
 import {
     deepClone
-} from "../copy/index.js" //自定义的deepCopy,返回值可能是Immutable数据 
+} from "../util/copy.js" //自定义的deepCopy,返回值可能是Immutable数据 
 import {
-    isPrimitive,
-    getDataType
+    getDataType,
+    isObject,
+    isImmutableStructure
 } from "../util/index.js";
-import deepEqual from "deep-equal"
+import {
+    deepEqual
+} from "../util/equal.js";
 
 function isNotInThePath(parents, key, floor) {
     if (parents && parents.get(floor) !== undefined && parents.get(floor) != key) {
@@ -30,118 +32,88 @@ function isNotInThePath(parents, key, floor) {
  */
 export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parents, handler) {
 
-    if (getDataType(obj1) != getDataType(obj2)) { //类型不同
-        resultObj.push({
-            path,
-            type: type.push(getDataType(obj1, true)),
-            operation: 'update',
-            value: {
-                from: deepClone(obj1),
-                to: deepClone(obj2),
-            }
-        });
-    } else {
-        if (isPrimitive(obj1) || isPrimitive(obj2)) { //基本数据类型
-            console.log(obj1 , obj2 ,'<<<<+++<')
-            if (obj1 !== obj2) {
-                resultObj.push({
-                    path,
-                    type: type.push(getDataType(obj1, true)),
-                    operation: 'update',
-                    value: {
-                        from: deepClone(obj1),
-                        to: deepClone(obj2),
-                    }
-                });
-            }
-        } else { //引用数据类型
-            obj1 = Immutable.fromJS(obj1)
-            obj2 = Immutable.fromJS(obj2)
+    if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
+        obj1 = Immutable.fromJS(obj1);
+        obj2 = Immutable.fromJS(obj2);
+        const filteKeys2 = {};
+        obj2.map((val, key) => {
+            filteKeys2[key] = key
+        })
+        //old有但new可能没有或者不同
+        obj1.map((val, key) => {
 
-            if (Immutable.isImmutable(obj1) && Immutable.isImmutable(obj2)) {
-
-                const filteKeys2 = {};
-                obj2.map((val, key) => {
-                    filteKeys2[key] = key
-                })
-                //old有但new可能没有或者不同
-                obj1.map((val, key) => {
-
-                    delete filteKeys2[key];
-                    key = key + '';
-                    if (!Immutable.is(obj1.get(key), obj2.get(key))) {
-                        if (isNotInThePath(parents, key, path.size)) { //只是为了手动筛选对比路径用的
-                            return
-                        }
-                        //将变化过的属性挂载到返回对象中
-                        if (obj2.get(key) !== undefined) {
-                            if (isObject(obj1.get(key)) && isObject(obj2.get(key))) { //如果是对象
-                                if (typeof handler == 'function' && getDataType(obj1.get(key)) == 'Immutable List' && getDataType(obj2.get(key)) == 'Immutable List') {
-                                    handler(obj1.get(key), obj2.get(key), path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
-                                } else {
-                                    objectDiffHandler(obj1.get(key), obj2.get(key), path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
-                                }
-                            } else { //
-                                resultObj.push({
-                                    path: path.push(key),
-                                    operation: 'update',
-                                    type: type.push(getDataType(obj1, true)),
-                                    value: {
-                                        from: deepClone(obj1.get(key)),
-                                        to: deepClone(obj2.get(key)),
-                                    }
-                                });
-                            console.log(obj1.get(key), obj2.get(key) ,'<<<<<',resultObj)
-                            }
+            delete filteKeys2[key];
+            key = key + '';
+            let val2 = obj2.get(key)
+            if (!deepEqual(val, val2)) {
+                if (isNotInThePath(parents, key, path.size)) { //只是为了手动筛选对比路径用的
+                    return
+                }
+                //将变化过的属性挂载到返回对象中
+                if (val2 !== undefined) {
+                    if (isObject(val) && isObject(val2)) { //如果是对象
+                        if (typeof handler == 'function' && getDataType(val) == 'Immutable List' && getDataType(val2) == 'Immutable List') {
+                            handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
                         } else {
-                            resultObj.push({
-                                path: path.push(key),
-                                operation: 'delete',
-                                type: type.push(getDataType(obj1, true)),
-                                value: {
-                                    from: deepClone(obj1.get(key)),
-                                    to: undefined,
-                                }
-                            });
+                            objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
                         }
-                    }
-                });
-                const keys2 = Object.keys(filteKeys2);
-                //new有单old没有
-                keys2.forEach(key => {
-                    key = key + '';
-                    if (isNotInThePath(parents, key, path.size)) {
-                        return
-                    }
-                    if (obj1.get(key) !== obj2.get(key)) {
-                        //将变化过的属性挂载到返回对象中
+                    } else { //
                         resultObj.push({
                             path: path.push(key),
-                            operation: 'add',
+                            operation: 'update',
                             type: type.push(getDataType(obj1, true)),
                             value: {
-                                from: undefined,
-                                to: deepClone(obj2.get(key)),
+                                from: deepClone(val),
+                                to: deepClone(val2),
                             }
-                        })
-
+                        });
                     }
-                });
-            } else {
-                if (!deepEqual(obj1, obj2)) {
+                } else {
                     resultObj.push({
-                        path,
-                        operation: 'update',
-                        type: type,
+                        path: path.push(key),
+                        operation: 'delete',
+                        type: type.push(getDataType(obj1, true)),
                         value: {
-                            from: deepClone(obj1),
-                            to: deepClone(obj2),
+                            from: deepClone(val),
+                            to: undefined,
                         }
                     });
                 }
             }
-        }
+        });
+        const keys2 = Object.keys(filteKeys2);
+        //new有单old没有
+        keys2.forEach(key => {
+            key = key + '';
+            if (isNotInThePath(parents, key, path.size)) {
+                return
+            }
+            if (obj1.get(key) !== obj2.get(key)) {
+                //将变化过的属性挂载到返回对象中
+                resultObj.push({
+                    path: path.push(key),
+                    operation: 'add',
+                    type: type.push(getDataType(obj1, true)),
+                    value: {
+                        from: undefined,
+                        to: deepClone(obj2.get(key)),
+                    }
+                })
 
+            }
+        });
+    } else {
+        if (!deepEqual(obj1, obj2)) {
+            resultObj.push({
+                path,
+                type: type.push(getDataType(obj1, true)),
+                operation: 'update',
+                value: {
+                    from: deepClone(obj1),
+                    to: deepClone(obj2),
+                }
+            });
+        }
     }
     return resultObj
 }

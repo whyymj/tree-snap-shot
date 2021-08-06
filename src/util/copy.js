@@ -1,6 +1,6 @@
-const cloneDeep = require('deepcopy');
-const Immutable = require("immutable")
-exports.deepClone = function (data) {
+import cloneDeep from 'deepcopy'
+import Immutable from 'immutable'
+export const deepClone = function (data) {
     if (Immutable.isImmutable(data)) {
         return data
     }

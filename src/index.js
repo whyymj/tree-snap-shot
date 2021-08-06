@@ -20,7 +20,7 @@ function differs(data1, data2, path, type, resultObj, parents, handler) {
     }
 }
 
-function diff(data1, data2, path = []) {
+export function diff(data1, data2, path = []) {
     let result = [];
     differs(data1, data2, Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs);
     return Immutable.fromJS(result).toJS();
