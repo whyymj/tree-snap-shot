@@ -11,10 +11,8 @@ import {
 } from './util/index'
 
 function differs(data1, data2, path, type, resultObj, parents, handler) {
-    if (Array.isArray(data1) && Array.isArray(data2)) {
-        arrayDiff(data1, data2, path, type, resultObj, parents, handler);
-    } else if (getDataType(data1) == 'Immutable List' && getDataType(data2) == 'Immutable List') {
-        arrayDiff(data1.toJS(), data2.toJS(), path, type, resultObj, parents, handler);
+    if (getDataType(data1) == 'Immutable List' && getDataType(data2) == 'Immutable List') {
+        arrayDiff(data1.toArray(), data2.toArray(), path, type, resultObj, parents, handler);
     } else if (isObject(data1) || isObject(data2)) {
         objectDiff(data1, data2, path, type, resultObj, parents, handler);
     }
@@ -22,7 +20,7 @@ function differs(data1, data2, path, type, resultObj, parents, handler) {
 
 export function diff(data1, data2, path = []) {
     let result = [];
-    differs(data1, data2, Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs);
+    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs);
     return Immutable.fromJS(result).toJS();
 }
 

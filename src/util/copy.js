@@ -5,7 +5,7 @@ export const deepClone = function (data) {
         return data
     }
     let copy = Immutable.fromJS(data)
-    if (copy === data) {
+    if (!Immutable.isImmutable(copy)) {//无法转化为immutable的数据用deepcopy
         return cloneDeep(data)
     }
     return copy

@@ -51,22 +51,10 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parent
                 }
                 //将变化过的属性挂载到返回对象中
                 if (val2 !== undefined) {
-                    if (isObject(val) && isObject(val2)) { //如果是对象
-                        if (typeof handler == 'function' && getDataType(val) == 'Immutable List' && getDataType(val2) == 'Immutable List') {
-                            handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
-                        } else {
-                            objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
-                        }
-                    } else { //
-                        resultObj.push({
-                            path: path.push(key),
-                            operation: 'update',
-                            type: type.push(getDataType(obj1, true)),
-                            value: {
-                                from: deepClone(val),
-                                to: deepClone(val2),
-                            }
-                        });
+                    if (typeof handler == 'function' && getDataType(val) == 'Immutable List' && getDataType(val2) == 'Immutable List') {
+                        handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
+                    } else {
+                        objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
                     }
                 } else {
                     resultObj.push({

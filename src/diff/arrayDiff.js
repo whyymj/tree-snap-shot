@@ -3,7 +3,9 @@ import {
     getDataType
 } from '../util/index.js'
 import Immutable from 'immutable'
-import {deepEqual} from '../util/equal.js'
+import {
+    deepEqual
+} from '../util/equal.js'
 
 function myers(stra, strb, equal = (a, b) => a === b) {
     let n = stra.length;
@@ -143,19 +145,12 @@ function getRes(snakes, stra, strb) {
 export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], parents, handler) {
 
     let diff = myers(arr1, arr2, (a, b) => {
-
         if (isPrimitive(a) || isPrimitive(b)) {
             return a === b
         } else if (a['@@_diff_id_@@'] && b['@@_diff_id_@@']) {
             return a['@@_diff_id_@@'] === b['@@_diff_id_@@']
         } else { //引用数据类型
-            let imA = Immutable.fromJS(a);
-            let imB = Immutable.fromJS(b);
-            if (Immutable.isImmutable(imA) || Immutable.isImmutable(imB)) { //immutable类型
-                return Immutable.is(imA, imB);
-            } else { // Map ，function ,Set 等对象的对比
-                return deepEqual(a, b);
-            }
+            return deepEqual(a, b);
         }
     })
     if (diff.length) {
