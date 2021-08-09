@@ -54,7 +54,7 @@ test('diff(obj1, obj2)', () => {
     },
     children: [{
       id: 'child1-id',
-      name: 'child1-name',
+      name: 'child1-1-name',
     }, {
       id: 'child2-id',
       name: 'child2-name',
@@ -63,42 +63,50 @@ test('diff(obj1, obj2)', () => {
       name: 'child2-name',
     }]
   }
-  expect(diff(data1, data2)).toEqual(
-    [{
-      "path": ["id"],
-      "type": ["object", "string"],
-      "operation": "update",
+  let result = [{
+    "path": ["id"],
+    "type": ["object", "string"],
+    "operation": "update",
+    "value": {
+      "from": "data1-id",
+      "to": "data2-id"
+    }
+  }, {
+    "path": ["name"],
+    "type": ["object", "string"],
+    "operation": "update",
+    "value": {
+      "from": "data1-name",
+      "to": "data2-name"
+    }
+  }, {
+    "path": ["data", "test"],
+    "type": ["object", "object", "number"],
+    "operation": "update",
+    "value": {
+      "from": 1,
+      "to": "2"
+    }
+  }, {
+    "path": ["children", 0, "name"],
+    "type": ["object", "object", "object", "string"],
+    "operation": "update",
+    "value": {
+      "from": "child1-name",
+      "to": "child1-1-name"
+    }
+  }, {
+    "path": ["children"],
+    "type": ["object"],
+    "operation": "myers-diff",
+    "steps": [{
+      "operation": "add",
       "value": {
-        "from": "data1-id",
-        "to": "data2-id"
-      }
-    }, {
-      "path": ["name"],
-      "type": ["object", "string"],
-      "operation": "update",
-      "value": {
-        "from": "data1-name",
-        "to": "data2-name"
-      }
-    }, {
-      "path": ["data", "test"],
-      "type": ["object", "object", "number"],
-      "operation": "update",
-      "value": {
-        "from": 1,
-        "to": "2"
-      }
-    }, {
-      "path": ["children"],
-      "type": ["object"],
-      "operation": "myers-diff",
-      "steps": [{
-        "operation": "add",
-        "value": {
-          "id": "child3-id",
-          "name": "child2-name"
-        },
-        "index": [2, 2]
-      }]
-    }]);
+        "id": "child3-id",
+        "name": "child2-name"
+      },
+      "index": [2, 2]
+    }]
+  }]
+  expect(diff(data1, data2)).toEqual(result);
 });

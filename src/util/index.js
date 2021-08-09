@@ -31,7 +31,13 @@ function isPlainObject(value) {
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
- export const isImmutableStructure = function (value) {
+export const isImmutable = function (value) {
+    return Immutable.isImmutable(value)
+}
+/**
+ * 判断是否是immutable数据或是可以转化为immutable的数据
+ */
+export const isImmutableStructure = function (value) {
     return (
         typeof value === 'object' &&
         (Immutable.isImmutable(value) || Array.isArray(value) || isPlainObject(value))
@@ -68,5 +74,3 @@ export function getDataType(data, toJS = false) {
     return typeOf(data)
 }
 export const isObject = isObj;
-
- 

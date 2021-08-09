@@ -1,5 +1,6 @@
 import {
-    objectDiffHandler as objectDiff
+    objectDiffHandler as objectDiff,
+    similarity
 } from './diff/objectDiff.js'
 import {
     myersDiffHandler as arrayDiff
@@ -10,28 +11,31 @@ import {
     getDataType
 } from './util/index'
 
-function differs(data1, data2, path, type, resultObj, parents, handler) {
+function differs(data1, data2, path, type, resultObj, handler, options) {
     if (getDataType(data1) == 'Immutable List' && getDataType(data2) == 'Immutable List') {
-        arrayDiff(data1.toArray(), data2.toArray(), path, type, resultObj, parents, handler);
+        arrayDiff(data1.toArray(), data2.toArray(), path, type, resultObj, handler, options);
     } else if (isObject(data1) || isObject(data2)) {
-        objectDiff(data1, data2, path, type, resultObj, parents, handler);
+        objectDiff(data1, data2, path, type, resultObj, handler, options);
     }
 }
 
-export function diff(data1, data2, path = []) {
+export function diff(data1, data2, options = {}) {
     let result = [];
-    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, (path.length ? Immutable.List(path) : null), differs);
+    let path = options.path || [];
+    options.path = (path.length ? Immutable.List(path) : null)
+    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, differs, options);
     return Immutable.fromJS(result).toJS();
-}
-
+} 
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
         typeof define === 'function' && define.amd ? define(['exports'], factory) :
         (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.TreeDiff = {}));
 }(this, (function (exports) {
     var TreeDiff = {
-        diff
+        diff,
+        similarity
     }
     exports.default = TreeDiff;
     exports.diff = diff
+    exports.similarity = similarity
 })))

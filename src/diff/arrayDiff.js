@@ -1,11 +1,12 @@
 import {
     isPrimitive,
-    getDataType
+    getDataType,
+    isImmutable
 } from '../util/index.js'
-import Immutable from 'immutable'
 import {
     deepEqual
 } from '../util/equal.js'
+import config from '../config/index.js'
 
 function myers(stra, strb, equal = (a, b) => a === b) {
     let n = stra.length;
@@ -102,11 +103,11 @@ function getRes(snakes, stra, strb) {
 
         if (index === 0 && s !== 0) { //不变的值
             for (let j = 0; j < s; j++) {
-                // args.push({
-                //     operation: '',
-                //     value: stra[j],
-                //     index: [j, yOffset]
-                // })
+                args.push({
+                    operation: '',
+                    value: stra[j],
+                    index: [j, yOffset]
+                })
                 yOffset++
             }
         }
@@ -131,42 +132,43 @@ function getRes(snakes, stra, strb) {
 
         // 不变
         for (let i = 0; i < e - large; i++) {
-            // args.push({
-            //     operation: '',
-            //     value: stra[large + i],
-            //     index: [large + i, yOffset],
-            // })
+            args.push({
+                operation: '',
+                value: stra[large + i],
+                index: [large + i, yOffset],
+            })
             yOffset++
         }
     })
     return args;
 }
 
-export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], parents, handler) {
+export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], handler, options = {}) {
 
     let diff = myers(arr1, arr2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
             return a === b
-        } else if (a['@@_diff_id_@@'] && b['@@_diff_id_@@']) {
-            return a['@@_diff_id_@@'] === b['@@_diff_id_@@']
+        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
+            return a[config.list.key] === b[config.list.key]
         } else { //引用数据类型
             return deepEqual(a, b);
         }
     })
     if (diff.length) {
+        
+        if (typeof handler == 'function') {
+            diff.forEach((item) => {
+                if (!item.operation && getDataType(item.value) == 'Immutable Map' && item.value.get(config.list.key)) {
+                    handler(arr1[item.index[0]], arr2[item.index[1]], path.push(item.index[0]), type.push(getDataType(arr1[item.index[0]], true)), resultObj, handler, options)
+                }
+            })
+        }
         resultObj.push({
             path,
             type,
             operation: 'myers-diff',
-            steps: diff
+            steps: diff.filter(item=>item.operation)
         });
-        if (typeof handler == 'function') {
-            diff.forEach((item) => {
-                if (!item.operation && item.value['@@_diff_id_@@']) {
-                    handler(arr1[item.index[0]], arr2[item.index[1]], path.push(item.index[0]), type.push(getDataType(arr1[item.index[0]], true)), resultObj, parents, handler)
-                }
-            })
-        }
     }
     return diff;
 }

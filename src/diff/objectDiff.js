@@ -4,15 +4,14 @@ import {
 } from "../util/copy.js" //自定义的deepCopy,返回值可能是Immutable数据 
 import {
     getDataType,
-    isObject,
     isImmutableStructure
 } from "../util/index.js";
 import {
     deepEqual
 } from "../util/equal.js";
 
-function isNotInThePath(parents, key, floor) {
-    if (parents && parents.get(floor) !== undefined && parents.get(floor) != key) {
+function isNotInThePath(path, key, floor) {
+    if (path && path.get(floor) !== undefined && path.get(floor) != key) {
         return true
     }
     return false
@@ -25,36 +24,37 @@ function isNotInThePath(parents, key, floor) {
  * @param path 到达该节点的路径，值为key
  * @param type 到达该节点的路径，值为父节点类型
  * @param resultObj 对比出的差异，即最终结果
- * @param parents 筛选用的路径，不在进行路径外的差异对比
+ * @param path 筛选用的路径，不在进行路径外的差异对比
  * @param handler 下一层的处理函数
  * 
  * @returns {{}} 包含所有差异的数组
  */
-export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parents, handler) {
+export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handler, options = {}) {
 
     if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
         obj1 = Immutable.fromJS(obj1);
         obj2 = Immutable.fromJS(obj2);
         const filteKeys2 = {};
         obj2.map((val, key) => {
-            filteKeys2[key] = key
+            if (val !== undefined && val !== null) {
+                filteKeys2[key] = key
+            }
         })
         //old有但new可能没有或者不同
         obj1.map((val, key) => {
-
             delete filteKeys2[key];
             key = key + '';
             let val2 = obj2.get(key)
             if (!deepEqual(val, val2)) {
-                if (isNotInThePath(parents, key, path.size)) { //只是为了手动筛选对比路径用的
+                if (isNotInThePath(options.path, key, path.size)) { //只是为了手动筛选对比路径用的
                     return
                 }
                 //将变化过的属性挂载到返回对象中
                 if (val2 !== undefined) {
                     if (typeof handler == 'function' && getDataType(val) == 'Immutable List' && getDataType(val2) == 'Immutable List') {
-                        handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
+                        handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
                     } else {
-                        objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, parents, handler)
+                        objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
                     }
                 } else {
                     resultObj.push({
@@ -73,7 +73,7 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parent
         //new有单old没有
         keys2.forEach(key => {
             key = key + '';
-            if (isNotInThePath(parents, key, path.size)) {
+            if (isNotInThePath(options.path, key, path.size)) {
                 return
             }
             if (obj1.get(key) !== obj2.get(key)) {
@@ -105,17 +105,45 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], parent
     }
     return resultObj
 }
+export function similarity(obj1, obj2) {
+    let total = 0;
+    let changed = 0;
+    let unchanged = 0
 
-/**
- * 找到两个对象数组的差异，并打印从list1到list2的所有变化
- * 注意约定id不能修改
- * @param list1 原数组
- * @param list2 可能修改过的数组
- */
-export function objectDiff(olddata, newdata, path = []) {
+    if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
+        obj1 = Immutable.fromJS(obj1);
+        obj2 = Immutable.fromJS(obj2);
+        const filteKeys = {};
 
-    //比较obj1和obj2的差异
-    const objOperateObj = objectDiffHandler(olddata, newdata, Immutable.List([]), Immutable.List([]), [], (path.length ? Immutable.List(path) : null));
+        obj2.map((val, key) => {
+            if (val !== undefined && val !== null) {
+                filteKeys[key] = val;
+                if(obj1.get(key)=== undefined||obj1.get(key)===null) {
+                    changed++
+                }
+            }
+        })
+        obj1.map((val, key) => {
+            if (val !== undefined && val !== null) {
+                total++
+                if (filteKeys[key]) {
+                    if (deepEqual(val, filteKeys[key])) {
+                        unchanged++
+                    } else {
+                        changed++
+                    }
+                    delete filteKeys[key];
+                } else {
+                    filteKeys[key] = key
+                    changed++
+                }
+            }
 
-    return Immutable.fromJS(objOperateObj).toJS();
+        });
+    }
+    return {
+        total,
+        unchanged,
+        changed
+    }
 }

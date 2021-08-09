@@ -1,12 +1,40 @@
-const {
-    diff
-} = require('./dist/index')
-const Immutable = require('immutable')
-let data1 = Immutable.fromJS([{
-    id: 1
-}, {
-    id: 2
-}, {
-    id: 3
-}]) 
-console.log(data1.toArray());
+const similarity = require('./dist/index').diff
+// const Immutable = require('immutable')
+// let data1 = Immutable.fromJS({
+//     data: {
+//         id:1
+//     }
+// })
+ 
+let data1 = {
+    id: 'data1-id',
+    name: 'data1-name',
+    data: {
+      test: 1
+    },
+    children: [{
+      id: 'child1-id',
+      name: 'child1-name',
+    }, {
+      id: 'child2-id',
+      name: 'child2-name',
+    }]
+  }
+  let data2 = {
+    id: 'data2-id',
+    name: 'data2-name',
+    data: {
+      test: '2'
+    },
+    children: [{
+      id: 'child1-id',
+      name: 'child1-1-name',
+    }, {
+      id: 'child2-id',
+      name: 'child2-name',
+    }, {
+      id: 'child3-id',
+      name: 'child2-name',
+    }]
+  }
+console.log(JSON.stringify(similarity(data1,data2)))
