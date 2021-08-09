@@ -1,6 +1,5 @@
 import {
-    objectDiffHandler as objectDiff,
-    similarity
+    objectDiffHandler as objectDiff
 } from './diff/objectDiff.js'
 import {
     myersDiffHandler as arrayDiff
@@ -8,8 +7,11 @@ import {
 import Immutable from 'immutable'
 import isObject from 'isobject'
 import {
-    getDataType
+    getDataType,
 } from './util/index'
+import {
+    like
+} from './util/equal'
 
 function differs(data1, data2, path, type, resultObj, handler, options) {
     if (getDataType(data1) == 'Immutable List' && getDataType(data2) == 'Immutable List') {
@@ -33,9 +35,9 @@ export function diff(data1, data2, options = {}) {
 }(this, (function (exports) {
     var TreeDiff = {
         diff,
-        similarity
+        like
     }
     exports.default = TreeDiff;
     exports.diff = diff
-    exports.similarity = similarity
+    exports.like = like
 })))

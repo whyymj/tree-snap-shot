@@ -1,5 +1,5 @@
-const similarity = require('./dist/index').diff
-// const Immutable = require('immutable')
+const similarity = require('./dist/index').like
+const Immutable = require('immutable')
 // let data1 = Immutable.fromJS({
 //     data: {
 //         id:1
@@ -9,6 +9,7 @@ const similarity = require('./dist/index').diff
 let data1 = {
     id: 'data1-id',
     name: 'data1-name',
+    test:0,
     data: {
       test: 1
     },
@@ -21,7 +22,7 @@ let data1 = {
     }]
   }
   let data2 = {
-    id: 'data2-id',
+    id: 'data1-id',
     name: 'data2-name',
     data: {
       test: '2'

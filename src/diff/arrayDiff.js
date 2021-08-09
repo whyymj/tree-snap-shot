@@ -4,7 +4,7 @@ import {
     isImmutable
 } from '../util/index.js'
 import {
-    deepEqual
+    shallowEqual
 } from '../util/equal.js'
 import config from '../config/index.js'
 
@@ -151,11 +151,10 @@ export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = []
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
             return a[config.list.key] === b[config.list.key]
         } else { //引用数据类型
-            return deepEqual(a, b);
+            return shallowEqual(a, b);
         }
     })
     if (diff.length) {
-        
         if (typeof handler == 'function') {
             diff.forEach((item) => {
                 if (!item.operation && getDataType(item.value) == 'Immutable Map' && item.value.get(config.list.key)) {
