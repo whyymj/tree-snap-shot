@@ -74,3 +74,6 @@ export function getDataType(data, toJS = false) {
     return typeOf(data)
 }
 export const isObject = isObj;
+export const isNull = (data) => {
+    return data === null || data === undefined
+};

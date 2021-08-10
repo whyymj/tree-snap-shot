@@ -10,7 +10,6 @@ import {
     getDataType,
 } from './util/index'
 import {
-    like,
     similarity
 } from './util/equal'
 
@@ -36,11 +35,9 @@ export function diff(data1, data2, options = {}) {
 }(this, (function (exports) {
     var TreeDiff = {
         diff,
-        like,
         similarity
     }
     exports.default = TreeDiff;
     exports.diff = diff
-    exports.like = like
     exports.similarity = similarity
 })))
