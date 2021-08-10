@@ -10,7 +10,8 @@ import {
     getDataType,
 } from './util/index'
 import {
-    like
+    like,
+    similarity
 } from './util/equal'
 
 function differs(data1, data2, path, type, resultObj, handler, options) {
@@ -27,7 +28,7 @@ export function diff(data1, data2, options = {}) {
     options.path = (path.length ? Immutable.List(path) : null)
     differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, differs, options);
     return Immutable.fromJS(result).toJS();
-} 
+}
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
         typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -35,9 +36,11 @@ export function diff(data1, data2, options = {}) {
 }(this, (function (exports) {
     var TreeDiff = {
         diff,
-        like
+        like,
+        similarity
     }
     exports.default = TreeDiff;
     exports.diff = diff
     exports.like = like
+    exports.similarity = similarity
 })))
