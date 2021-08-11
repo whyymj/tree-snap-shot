@@ -1,6 +1,7 @@
 import Immutable from 'immutable'
 import typeOf from 'kind-of'
 import isObj from "isobject"
+import cacher from '../cache/index.js'
 var toString = Object.prototype.toString;
 
 function isPlainObject(value) {
@@ -65,11 +66,18 @@ export function isPrimitive(value) {
  * @returns boolean
  */
 export function getDataType(data, toJS = false) {
-    if (Immutable.isImmutable(data) && !toJS) {
-        return 'Immutable ' + data.toString().split(' ')[0]
-    }
-    if (Immutable.isImmutable(data) && toJS) {
-        data = data.toJS()
+    if (Immutable.isImmutable(data)) {
+        let type = data.toString()
+        if (toJS) {
+            if (type.indexOf('Map') == 0) {
+                return 'object'
+            } else if (type.indexOf('List') == 0) {
+                return 'array'
+            }
+            data = data.toJS()
+        } else {
+            return 'Immutable ' + type.split(' ')[0]
+        }
     }
     return typeOf(data)
 }
@@ -77,3 +85,62 @@ export const isObject = isObj;
 export const isNull = (data) => {
     return data === null || data === undefined
 };
+export const isDom = (obj) => {
+    if (typeof HTMLElement === 'object') {
+        return obj instanceof HTMLElement;
+    }
+    return obj && typeof obj === 'object' && (obj.nodeType === 1 || obj.nodeType === 9) && typeof obj.nodeName === 'string';
+};
+export function getKeysNum(a) {
+    let num = 0;
+
+    if (isImmutableStructure(a)) {
+        a = Immutable.fromJS(a);
+        if (cacher.get(a)) {
+            return cacher.get(a)
+        }
+        if (getDataType(a) == 'Immutable Map' || getDataType(a) == 'Immutable List') {
+            a.map(val => {
+                if (isImmutableStructure(val)) {
+                    num += getKeysNum(val, statistics)
+                } else {
+                    num++
+                }
+            })
+        }
+        if (num) {
+            cacher.set(a, num)
+        }
+    }
+
+    return num
+}
+export function statisticListSteps(arr1, arr2, list) {
+    let data = {
+        total: arr1.length || arr1.size,
+        unchanged: 0,
+        add: 0,
+        del: 0,
+        updated: 0,
+        changed: 0,
+        similarity: 0
+    }
+    if (list.length) {
+        list.forEach(item => {
+            if (!item.operation) {
+                data.unchanged++;
+            } else if (item.operation == "add") {
+                if (item.index[0] != item.index[1]) {
+                    data.add++;
+                }
+            } else if (item.operation == 'del') {
+                if (item.index[0] != item.index[1]) {
+                    data.del++;
+                }
+            }
+        })
+    } else {
+        data.unchanged = 1
+    }
+    return data;
+}

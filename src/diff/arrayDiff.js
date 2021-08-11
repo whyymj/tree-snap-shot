@@ -9,9 +9,16 @@ import {
 } from '../util/equal.js'
 import config from '../config/index.js'
 
-function myers(stra, strb, equal = (a, b) => a === b) {
-    let n = stra.length;
-    let m = strb.length;
+function getListValue(data, key) {
+    if (data.get) {
+        return data.get(key + '')
+    }
+    return data[key]
+}
+
+export function myers(stra, strb, equal = (a, b) => a === b) {
+    let n = stra.length || stra.size;
+    let m = strb.length || strb.size;
     let snakes;
     let v = {
         '1': 0
@@ -40,7 +47,7 @@ function myers(stra, strb, equal = (a, b) => a === b) {
                 let xEnd = xMid
                 let yEnd = yMid
 
-                while (xEnd < n && yEnd < m && equal(stra[xEnd], strb[yEnd])) {
+                while (xEnd < n && yEnd < m && equal(getListValue(stra, xEnd), getListValue(strb, yEnd))) {
                     xEnd++
                     yEnd++
                 }
@@ -92,6 +99,7 @@ function solution(vs, n, m, d) {
     return snakes
 }
 
+
 function getRes(snakes, stra, strb) {
     let args = []
     let yOffset = 0
@@ -106,7 +114,7 @@ function getRes(snakes, stra, strb) {
             for (let j = 0; j < s; j++) {
                 args.push({
                     operation: '',
-                    value: stra[j],
+                    value: getListValue(stra, j),
                     index: [j, yOffset]
                 })
                 yOffset++
@@ -117,7 +125,7 @@ function getRes(snakes, stra, strb) {
         if (m - s == 1) { //删掉的值
             args.push({
                 operation: 'del',
-                value: stra[s],
+                value: getListValue(stra, s),
                 index: [s, yOffset]
             })
             large = m
@@ -125,7 +133,7 @@ function getRes(snakes, stra, strb) {
         } else {
             args.push({
                 operation: 'add',
-                value: strb[yOffset],
+                value: getListValue(strb, yOffset),
                 index: [s, yOffset]
             })
             yOffset++
@@ -135,7 +143,7 @@ function getRes(snakes, stra, strb) {
         for (let i = 0; i < e - large; i++) {
             args.push({
                 operation: '',
-                value: stra[large + i],
+                value: getListValue(stra, large + i),
                 index: [large + i, yOffset],
             })
             yOffset++
@@ -145,30 +153,42 @@ function getRes(snakes, stra, strb) {
 }
 
 export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], handler, options = {}) {
-
+    let cache = {}
     let diff = myers(arr1, arr2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
             return a === b
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
-            return a[config.list.key] === b[config.list.key]
-        } else { //引用数据类型
-            return similarity(a, b) > 0.6;
+            return a.get(config.list.key) === b.get(config.list.key)
+        } else { //引用数据类型 
+            return similarity(a, b).similarity > 0.6;
         }
+         
     })
     if (diff.length) {
         if (typeof handler == 'function') {
             diff.forEach((item) => {
-                if (!item.operation && getDataType(item.value) == 'Immutable Map' && item.value.get(config.list.key)) {
-                    handler(arr1[item.index[0]], arr2[item.index[1]], path.push(item.index[0]), type.push(getDataType(arr1[item.index[0]], true)), resultObj, handler, options)
+                if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
+                    if (!shallowEqual(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]))) {
+                        handler(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]), path.push(item.index[0]), type.push(getDataType(getListValue(arr1, item.index[0]), true)), resultObj, handler, options)
+                    }
                 }
             })
         }
+
         resultObj.push({
             path,
             type,
             operation: 'myers-diff',
-            steps: diff.filter(item => item.operation)
+            steps: diff.filter(item=>item.operation)
         });
+    } else if (arr1.length || arr1.size) {
+        arr1.map((item, index) => {
+            if (!shallowEqual(item, getListValue(arr2, index))) {
+                if (getDataType(item) == 'Immutable Map' || getDataType(item) == 'Immutable List') {
+                    handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), resultObj, handler, options)
+                }
+            }
+        })
     }
     return diff;
 }
