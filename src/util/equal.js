@@ -5,11 +5,12 @@ import {
     isImmutableStructure,
     isNull,
     getDataType,
-    getKeysNum,
+    getPathsNum,
     statisticListSteps,
+    reader
 } from './index'
 import {
-    myers as diff
+    myers
 } from '../diff/arrayDiff'
 
 import config from '../config/index.js'
@@ -30,7 +31,6 @@ export const deepEqual = function (obj1, obj2) {
     }
     return equal(obj1, obj2)
 };
-const equalCache = {}
 /**
  * 浅比较两个对象是否相似
  * @param {*} obj1 
@@ -39,58 +39,39 @@ const equalCache = {}
  * @returns 
  */
 function mapLike(obj1, obj2, isSimilar) {
-    let total = 0; //obj1的keys个数
     let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
     let unchanged = 0; //完全相同的key：value
 
-    if (isImmutableStructure(obj1) && isImmutableStructure(obj2) && getDataType(obj1, true) == getDataType(obj2, true)) { //可转为immutable结构或已经是了的数据
-
-        obj1 = Immutable.fromJS(obj1);
-        obj2 = Immutable.fromJS(obj2);
-        const filteKeys = {};
-        obj2.map((val, key) => {
-            if (!isNull(val)) {
-                filteKeys[key] = val;
-                if (isNull(obj1.get(key))) { //新增的字段
-                    add++
-                }
+    const filteKeys = {};
+    obj2.map((val, key) => {
+        if (!isNull(val)) {
+            filteKeys[key] = val;
+            if (isNull(obj1.get(key))) { //新增的字段
+                add++
             }
-        })
-        obj1.map((val, key) => {
-            if (!isNull(val)) {
-                total++
-                if (!isNull(filteKeys[key])) {
-                    if (Immutable.is(val, filteKeys[key])) {
-                        unchanged++
-                    } else {
-                        if (isSimilar) {
-                            isSimilar(val, filteKeys[key], key) || updated++
-                        } else {
-                            updated++
-                        };
-                    }
-                } else {
-                    del++
-                }
-            }
-
-        });
-
-    } else if (obj1 === obj2) {
-        return {
-            total: 1,
-            unchanged: 1,
-            add: 0,
-            del: 0,
-            updated: 0,
-            changed: 0,
-            similarity: 1
         }
-    }
+    })
+    obj1.map((val, key) => {
+        if (!isNull(val)) {
+            if (!isNull(filteKeys[key])) {
+                if (Immutable.is(val, filteKeys[key])) {
+                    unchanged++
+                } else {
+                    if (isSimilar) {
+                        isSimilar(val, filteKeys[key], key) || updated++
+                    } else {
+                        updated++
+                    };
+                }
+            } else {
+                del++
+            }
+        }
+    });
+
     return {
-        total,
         unchanged,
         add,
         del,
@@ -107,43 +88,31 @@ function mapLike(obj1, obj2, isSimilar) {
  * @returns 
  */
 function listLike(obj1, obj2, isSimilar) {
-    let total = 0; //obj1的keys个数
     let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
     let unchanged = 0; //完全相同的key：value
 
-    if (isImmutableStructure(obj1) && isImmutableStructure(obj2) && getDataType(obj1, true) == getDataType(obj2, true)) { //可转为immutable结构或已经是了的数据
-
-        obj1 = Immutable.fromJS(obj1);
-        obj2 = Immutable.fromJS(obj2);
-        let res = statisticListSteps(obj1, obj2, diff(obj1, obj2, (a, b) => {
-            if (isPrimitive(a) || isPrimitive(b)) {
-                return a === b
-            } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
-                return a.get(config.list.key) === b.get(config.list.key)
-            } else { //引用数据类型
-                return isSimilar(a, b).similarity > 0.6;
-            }
-        }));
-        total += res.total;
-        add += res.add;
-        del += res.del;
-        unchanged += res.unchanged;
-
-    } else if (obj1 === obj2) {
-        return {
-            total: 1,
-            unchanged: 1,
-            add: 0,
-            del: 0,
-            updated: 0,
-            changed: 0,
-            similarity: 1
+    let df = myers(obj1, obj2, (a, b) => {
+        let res = false
+        if (isPrimitive(a) || isPrimitive(b)) {
+            res = a === b
+        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
+            res = a.get(config.list.key) === b.get(config.list.key)
+        } else { //引用数据类型
+            res = isSimilar(a, b);
         }
-    }
+        reader(a, 'oooooooo')
+        reader(b, 'uuuuuuuu')
+        reader(isSimilar(a, b), '*****')
+    })
+
+    let res = statisticListSteps(obj1, obj2, df);
+    add += res.add;
+    del += res.del;
+    unchanged += res.unchanged;
+
     return {
-        total,
         unchanged,
         add,
         del,
@@ -161,43 +130,63 @@ function listLike(obj1, obj2, isSimilar) {
  * @returns 
  */
 export function similarity(data1, data2, rate = 0.6) {
-    let total = 0; //obj1的keys个数
     let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
     let unchanged = 0; //完全相同的key：value
 
     function check(obj1, obj2) {
-        if (isImmutableStructure(obj1) && isImmutableStructure(obj2) && getDataType(obj1, true) == getDataType(obj2, true)) { //可转为immutable结构或已经是了的数据
-            obj1 = Immutable.fromJS(obj1);
-            obj2 = Immutable.fromJS(obj2);
+        if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
+            if (getDataType(obj1, true) == getDataType(obj2, true)) {
+                obj1 = Immutable.fromJS(obj1);
+                obj2 = Immutable.fromJS(obj2);
 
-            let res = cacher.get(obj1, obj2);
-            if (!res) {
-                if (getDataType(obj1) == 'Immutable Map') {
-                    res = mapLike(obj1, obj2, (child1, child2) => {
-                        return check(child1, child2).similarity > rate
-                    });
-                } else if (getDataType(obj1) == 'Immutable List') {
-                    res = listLike(obj1, obj2, (child1, child2) => {
-                        return check(child1, child2).similarity > rate
-                    });
+                let res = cacher.get(obj1, obj2);
+
+                if (!res) {
+
+                    if (getDataType(obj1) == 'Immutable Map') {
+                        res = mapLike(obj1, obj2, (child1, child2) => {
+                            return check(child1, child2).similarity > rate
+                        });
+                    } else if (getDataType(obj1) == 'Immutable List') {
+                        res = listLike(obj1, obj2, (child1, child2) => {
+                            // reader(child1, 'child1');
+                            // reader(child2, 'child2');
+                            // reader(check(child1, child2), 'result');
+                            
+                            return check(child1, child2).similarity > rate
+                        });
+
+                    }
+                    // reader(obj1, 'obj1');
+                    // reader(obj2, 'obj2');
+                    // reader(res, 'res');
+                    cacher.set(obj1, obj2, res);
                 }
-                cacher.set(obj1, obj2, res);
+
+                updated += res.updated;
+                add += res.add;
+                del += res.del;
+                unchanged += res.unchanged;
+            } else {
+                updated += getPathsNum(obj1)
             }
-            total += res.total;
-            updated += res.updated;
-            add += res.add;
-            del += res.del;
-            unchanged += res.unchanged;
 
         } else if (obj1 === obj2) {
-            total += 1;
             unchanged += 1
         }
-
-        return {
-            total,
+        reader(obj1,'<<<<<>>>>>')
+        reader(obj2,'<<<<<>>>>>')
+        reader( {
+            unchanged,
+            add,
+            del,
+            updated,
+            changed: add + del + updated,
+            similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
+        },'obj1===obj2')
+        let res = {
             unchanged,
             add,
             del,
@@ -205,6 +194,8 @@ export function similarity(data1, data2, rate = 0.6) {
             changed: add + del + updated,
             similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
         }
+
+        return res
     }
     return check(data1, data2)
 }

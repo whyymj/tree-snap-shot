@@ -91,7 +91,12 @@ export const isDom = (obj) => {
     }
     return obj && typeof obj === 'object' && (obj.nodeType === 1 || obj.nodeType === 9) && typeof obj.nodeName === 'string';
 };
-export function getKeysNum(a) {
+/**
+ * 统计对象的非immutable值的个数
+ * @param {} a 
+ * @returns 
+ */
+export function getPathsNum(a) {
     let num = 0;
 
     if (isImmutableStructure(a)) {
@@ -99,48 +104,101 @@ export function getKeysNum(a) {
         if (cacher.get(a)) {
             return cacher.get(a)
         }
-        if (getDataType(a) == 'Immutable Map' || getDataType(a) == 'Immutable List') {
-            a.map(val => {
-                if (isImmutableStructure(val)) {
-                    num += getKeysNum(val, statistics)
-                } else {
-                    num++
-                }
-            })
-        }
+        a.map(val => {
+            num += getPathsNum(val)
+        })
+
         if (num) {
             cacher.set(a, num)
         }
+    } else {
+        return 1
     }
 
     return num
 }
+
 export function statisticListSteps(arr1, arr2, list) {
-    let data = {
-        total: arr1.length || arr1.size,
-        unchanged: 0,
-        add: 0,
-        del: 0,
-        updated: 0,
-        changed: 0,
-        similarity: 0
-    }
+    let unchanged = 0,
+        add = 0,
+        del = 0,
+        updated = 0,
+        changed = 0,
+        similarity = 0
+
     if (list.length) {
         list.forEach(item => {
             if (!item.operation) {
-                data.unchanged++;
+                unchanged++;
             } else if (item.operation == "add") {
                 if (item.index[0] != item.index[1]) {
-                    data.add++;
+                    add++;
                 }
             } else if (item.operation == 'del') {
                 if (item.index[0] != item.index[1]) {
-                    data.del++;
+                    del++;
                 }
             }
         })
     } else {
-        data.unchanged = 1
+        unchanged = getPathsNum(arr1)
     }
-    return data;
+
+    similarity = Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
+    reader(list, similarity + '???')
+    return {
+        unchanged,
+        add,
+        del,
+        updated,
+        changed,
+        similarity
+    };
 }
+export function reader(list, flag) {
+    try {
+
+        let res = JSON.stringify(Immutable.fromJS(list).toJS())
+        console.log(flag, '>>>>>>> ', res)
+        return res
+    } catch (e) {
+        console.log(flag, '>>>>>>> ', list)
+    }
+
+};
+
+
+[{
+    "operation": "del",
+    "value": {
+        "name": "child1-1",
+        "text": "111",
+        "uuu": "123",
+        "oo": "00"
+    },
+    "index": [0, 0]
+}, {
+    "operation": "del",
+    "value": {
+        "name": "child1-2",
+        "text": "222",
+        "uuu": "555"
+    },
+    "index": [1, 0]
+}, {
+    "operation": "add",
+    "value": {
+        "name": "child1-1",
+        "text": "111",
+        "uuu": "123"
+    },
+    "index": [2, 0]
+}, {
+    "operation": "add",
+    "value": {
+        "name": "child1-2",
+        "text": "222",
+        "uuu": "555"
+    },
+    "index": [2, 1]
+}]

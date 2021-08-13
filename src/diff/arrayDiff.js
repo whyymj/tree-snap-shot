@@ -153,7 +153,7 @@ function getRes(snakes, stra, strb) {
 }
 
 export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], handler, options = {}) {
-    let cache = {}
+
     let diff = myers(arr1, arr2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
             return a === b

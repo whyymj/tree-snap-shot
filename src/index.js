@@ -8,6 +8,7 @@ import Immutable from 'immutable'
 import isObject from 'isobject'
 import {
     getDataType,
+    reader
 } from './util/index'
 import {
     similarity
@@ -20,14 +21,25 @@ function differs(data1, data2, path, type, resultObj, handler, options) {
         objectDiff(data1, data2, path, type, resultObj, handler, options);
     }
 }
-
+/**
+ * start
+ * @param {old data} data1 
+ * @param {new data} data2 
+ * @param {*} options 
+ * @returns 
+ */
 export function diff(data1, data2, options = {}) {
-    let result = [];
+    let result = [];//最终的对比结果存在这里
     let path = options.path || [];
     options.path = (path.length ? Immutable.List(path) : null)
     differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, differs, options);
     return result;
 }
+
+
+/**
+ * 全局挂载
+ */
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
         typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -35,9 +47,11 @@ export function diff(data1, data2, options = {}) {
 }(this, (function (exports) {
     var TreeDiff = {
         diff,
-        similarity
+        similarity,
+        reader
     }
     exports.default = TreeDiff;
     exports.diff = diff
+    exports.reader = reader
     exports.similarity = similarity
 })))
