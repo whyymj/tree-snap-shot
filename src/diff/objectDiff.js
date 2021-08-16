@@ -8,7 +8,7 @@ import {
 import {
     deepEqual
 } from "../util/equal.js";
-import Logger from '../log/index.js'
+import Logger from '../snap-shot/index.js'
 
 export function isNotInThePath(path, key, floor) {
     if (path && path.get(floor) !== undefined && path.get(floor) != key) {
@@ -33,7 +33,7 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
     obj2.map((val, key) => {
         if (!isNull(val)) {
             if (isNull(obj1.get(key))) { //新增的字段
-                Logger.add({
+                Logger.record({
                     path: path.push(key),
                     operation: 'add',
                     type: type.push(getDataType(obj1, true)),
@@ -55,7 +55,7 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
                 if (!isNull(val2)) {
                     handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), handler)
                 } else {
-                    Logger.add({
+                    Logger.record({
                         path: path.push(key),
                         operation: 'delete',
                         type: type.push(getDataType(obj1, true)),

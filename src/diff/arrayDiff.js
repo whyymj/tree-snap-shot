@@ -7,7 +7,7 @@ import {
     similarity
 } from '../util/equal.js'
 import config from '../config/index.js'
-import Logger from '../log/index.js'
+import Logger from '../snap-shot/index.js'
 
 function getListValue(data, key) {
     if (data.get) {
@@ -197,7 +197,7 @@ export const myersDiffHandler = function(arr1, arr2, path, type, handler) {
             })
         }
 
-        Logger.add({
+        Logger.record({
             path,
             type,
             operation: 'myers-diff',

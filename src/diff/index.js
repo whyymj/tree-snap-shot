@@ -15,7 +15,7 @@ import {
     getDataType,
     isImmutableStructure,
 } from '../util/index'
-import Logger from '../log/index.js'
+import Logger from '../snap-shot/index.js'
 import Config from '../config/index.js'
 /**
  * 
@@ -44,7 +44,7 @@ function differs(data1, data2, path, type, handler) {
         }
     }
     if (!deepEqual(data1, data2)) {
-        Logger.add({
+        Logger.record({
             path,
             type: type.push(getDataType(data1, true)),
             operation: 'update',
@@ -64,6 +64,8 @@ function differs(data1, data2, path, type, handler) {
  * @returns 
  */
 export function diff(data1, data2, options = {}) {
+    Logger.clear()
+    Logger.clear()
     Config.set(options)
     differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
     return Logger.getLogs();
