@@ -1,7 +1,6 @@
 import {
     isPrimitive,
     getDataType,
-    isImmutable
 } from '../util/index.js'
 import {
     shallowEqual,
@@ -152,7 +151,29 @@ function getRes(snakes, stra, strb) {
     return args;
 }
 
-export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = [], handler, options = {}) {
+function mergeOperation(list) {
+    let item = null;
+    let next = null;
+    let newList = []
+    for (let i = 0; i < list.length; i++) {
+        item = list[i];
+        next = list[i + 1];
+
+        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1] && next.index[0] == next.index[1]) {
+            newList.push({
+                ...item,
+                value: [item.value, next.value],
+                operation: 'updated'
+            })
+            i++;
+        } else if (item ?.operation) {
+            newList.push(item)
+        }
+
+    }
+    return newList
+}
+export const myersDiffHandler = function(arr1, arr2, path, type, resultObj = [], handler, options = {}) {
 
     let diff = myers(arr1, arr2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
@@ -160,10 +181,10 @@ export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = []
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
             return a.get(config.list.key) === b.get(config.list.key)
         } else { //引用数据类型 
-            return similarity(a, b).similarity > 0.6;
+            return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
         }
-         
     })
+
     if (diff.length) {
         if (typeof handler == 'function') {
             diff.forEach((item) => {
@@ -179,14 +200,12 @@ export const myersDiffHandler = function (arr1, arr2, path, type, resultObj = []
             path,
             type,
             operation: 'myers-diff',
-            steps: diff.filter(item=>item.operation)
+            steps: mergeOperation(diff)
         });
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
             if (!shallowEqual(item, getListValue(arr2, index))) {
-                if (getDataType(item) == 'Immutable Map' || getDataType(item) == 'Immutable List') {
-                    handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), resultObj, handler, options)
-                }
+                handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), resultObj, handler, options)
             }
         })
     }

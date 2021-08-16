@@ -15,7 +15,7 @@ import {
 
 import config from '../config/index.js'
 import cacher from '../cache/index.js'
-export const deepEqual = function (obj1, obj2) {
+export const deepEqual = function(obj1, obj2) {
     if (isPrimitive(obj1) || isPrimitive(obj2)) {
         return obj1 === obj2;
     }
@@ -38,7 +38,7 @@ export const deepEqual = function (obj1, obj2) {
  * @param {回调函数} isSimilar 判断是否相似的判断条件,return true表示相似
  * @returns 
  */
-function mapLike(obj1, obj2, isSimilar) {
+function mapLike(obj1, obj2) {
     let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
@@ -55,18 +55,23 @@ function mapLike(obj1, obj2, isSimilar) {
     })
     obj1.map((val, key) => {
         if (!isNull(val)) {
-            if (!isNull(filteKeys[key])) {
-                if (Immutable.is(val, filteKeys[key])) {
-                    unchanged++
+            if (!isNull(filteKeys[key])) { //修改字段
+                if (Immutable.is(val, filteKeys[key])) { //未修改
+                    unchanged += getPathsNum(val);
                 } else {
-                    if (isSimilar) {
-                        isSimilar(val, filteKeys[key], key) || updated++
-                    } else {
-                        updated++
-                    };
+                    let res = similarity(val, filteKeys[key]);
+                    updated += res.updated;
+                    del += res.del;
+                    add += res.add;
+                    unchanged += res.unchanged;
                 }
-            } else {
-                del++
+            } else { //删除字段
+                if (isImmutableStructure(val)) {
+                    del += getPathsNum(val);
+                } else {
+                    del++
+                }
+
             }
         }
     });
@@ -87,7 +92,7 @@ function mapLike(obj1, obj2, isSimilar) {
  * @param {回调函数} isSimilar 判断是否相似的判断条件,return true表示相似
  * @returns 
  */
-function listLike(obj1, obj2, isSimilar) {
+function listLike(obj1, obj2) {
     let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
@@ -100,11 +105,9 @@ function listLike(obj1, obj2, isSimilar) {
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
             res = a.get(config.list.key) === b.get(config.list.key)
         } else { //引用数据类型
-            res = isSimilar(a, b);
+            res = similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
         }
-        reader(a, 'oooooooo')
-        reader(b, 'uuuuuuuu')
-        reader(isSimilar(a, b), '*****')
+        return res
     })
 
     let res = statisticListSteps(obj1, obj2, df);
@@ -123,45 +126,28 @@ function listLike(obj1, obj2, isSimilar) {
 }
 /**
  * 两个tree的结构相似度
- * @param {*} obj1 
- * @param {*} obj2 
- * @param {相似度[0,1]} rate 大于相似度的视作相等
- * 
+ * @param {old} obj1 老数据
+ * @param {new} obj2 新数据
  * @returns 
  */
-export function similarity(data1, data2, rate = 0.6) {
-    let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
-    let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
-    let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
-    let unchanged = 0; //完全相同的key：value
+export function similarity(data1, data2) {
 
     function check(obj1, obj2) {
-        if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
-            if (getDataType(obj1, true) == getDataType(obj2, true)) {
-                obj1 = Immutable.fromJS(obj1);
-                obj2 = Immutable.fromJS(obj2);
-
+        let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
+        let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
+        let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
+        let unchanged = 0; //完全相同的key：value
+        if (isImmutableStructure(obj1)) { //可转为immutable结构或已经是了的数据
+            obj1 = Immutable.fromJS(obj1);
+            obj2 = Immutable.fromJS(obj2);
+            if (getDataType(obj1) == getDataType(obj2)) {
                 let res = cacher.get(obj1, obj2);
-
                 if (!res) {
-
                     if (getDataType(obj1) == 'Immutable Map') {
-                        res = mapLike(obj1, obj2, (child1, child2) => {
-                            return check(child1, child2).similarity > rate
-                        });
+                        res = mapLike(obj1, obj2);
                     } else if (getDataType(obj1) == 'Immutable List') {
-                        res = listLike(obj1, obj2, (child1, child2) => {
-                            // reader(child1, 'child1');
-                            // reader(child2, 'child2');
-                            // reader(check(child1, child2), 'result');
-                            
-                            return check(child1, child2).similarity > rate
-                        });
-
+                        res = listLike(obj1, obj2);
                     }
-                    // reader(obj1, 'obj1');
-                    // reader(obj2, 'obj2');
-                    // reader(res, 'res');
                     cacher.set(obj1, obj2, res);
                 }
 
@@ -175,17 +161,10 @@ export function similarity(data1, data2, rate = 0.6) {
 
         } else if (obj1 === obj2) {
             unchanged += 1
+        } else {
+            updated += 1
         }
-        reader(obj1,'<<<<<>>>>>')
-        reader(obj2,'<<<<<>>>>>')
-        reader( {
-            unchanged,
-            add,
-            del,
-            updated,
-            changed: add + del + updated,
-            similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
-        },'obj1===obj2')
+
         let res = {
             unchanged,
             add,
@@ -199,11 +178,6 @@ export function similarity(data1, data2, rate = 0.6) {
     }
     return check(data1, data2)
 }
-export const shallowEqual = function (obj1, obj2) {
-
-    if (Immutable.is(obj1, obj2)) {
-        return true
-    }
-
-    return mapLike(obj1, obj2).changed == 0;
+export const shallowEqual = function(obj1, obj2) {
+    return Immutable.is(obj1, obj2)
 };

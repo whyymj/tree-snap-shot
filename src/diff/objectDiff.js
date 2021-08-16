@@ -1,16 +1,15 @@
-import Immutable from "immutable"
 import {
     deepClone
 } from "../util/copy.js" //自定义的deepCopy,返回值可能是Immutable数据 
 import {
     getDataType,
-    isImmutableStructure
+    isNull,
 } from "../util/index.js";
 import {
     deepEqual
 } from "../util/equal.js";
 
-function isNotInThePath(path, key, floor) {
+export function isNotInThePath(path, key, floor) {
     if (path && path.get(floor) !== undefined && path.get(floor) != key) {
         return true
     }
@@ -31,31 +30,30 @@ function isNotInThePath(path, key, floor) {
  */
 export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handler, options = {}) {
 
-    if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) { //可转为immutable结构或已经是了的数据
-        obj1 = Immutable.fromJS(obj1);
-        obj2 = Immutable.fromJS(obj2);
-        const filteKeys2 = {};
-        obj2.map((val, key) => {
-            if (val !== undefined && val !== null) {
-                filteKeys2[key] = key
-            }
-        })
-        //old有但new可能没有或者不同
-        obj1.map((val, key) => {
-            delete filteKeys2[key];
-            key = key + '';
-            let val2 = obj2.get(key)
-            if (!deepEqual(val, val2)) {
-                if (isNotInThePath(options.path, key, path.size)) { //只是为了手动筛选对比路径用的
-                    return
-                }
-                //将变化过的属性挂载到返回对象中
-                if (val2 !== undefined) {
-                    if (typeof handler == 'function' && getDataType(val) == 'Immutable List' && getDataType(val2) == 'Immutable List') {
-                        handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
-                    } else {
-                        objectDiffHandler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
+    obj2.map((val, key) => {
+        if (!isNull(val)) {
+            if (isNull(obj1.get(key))) { //新增的字段
+                resultObj.push({
+                    path: path.push(key),
+                    operation: 'add',
+                    type: type.push(getDataType(obj1, true)),
+                    value: {
+                        from: undefined,
+                        to: deepClone(obj2.get(key)),
                     }
+                })
+            }
+        }
+    })
+    //old有但new可能没有或者不同
+    obj1.map((val, key) => {
+        key = key + '';
+        let val2 = obj2.get(key)
+        if (!isNull(val)) {
+            if (!deepEqual(val, val2)) {
+                //将变化过的属性挂载到返回对象中
+                if (!isNull(val2)) {
+                    handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
                 } else {
                     resultObj.push({
                         path: path.push(key),
@@ -68,40 +66,9 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handle
                     });
                 }
             }
-        });
-        const keys2 = Object.keys(filteKeys2);
-        //new有单old没有
-        keys2.forEach(key => {
-            key = key + '';
-            if (isNotInThePath(options.path, key, path.size)) {
-                return
-            }
-            if (obj1.get(key) !== obj2.get(key)) {
-                //将变化过的属性挂载到返回对象中
-                resultObj.push({
-                    path: path.push(key),
-                    operation: 'add',
-                    type: type.push(getDataType(obj1, true)),
-                    value: {
-                        from: undefined,
-                        to: deepClone(obj2.get(key)),
-                    }
-                })
 
-            }
-        });
-    } else {
-        if (!deepEqual(obj1, obj2)) {
-            resultObj.push({
-                path,
-                type: type.push(getDataType(obj1, true)),
-                operation: 'update',
-                value: {
-                    from: deepClone(obj1),
-                    to: deepClone(obj2),
-                }
-            });
         }
-    }
+    });
+
     return resultObj
 }

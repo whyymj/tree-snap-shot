@@ -32,13 +32,13 @@ function isPlainObject(value) {
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutable = function (value) {
+export const isImmutable = function(value) {
     return Immutable.isImmutable(value)
 }
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutableStructure = function (value) {
+export const isImmutableStructure = function(value) {
     return (
         typeof value === 'object' &&
         (Immutable.isImmutable(value) || Array.isArray(value) || isPlainObject(value))
@@ -129,23 +129,20 @@ export function statisticListSteps(arr1, arr2, list) {
     if (list.length) {
         list.forEach(item => {
             if (!item.operation) {
-                unchanged++;
+                unchanged += getPathsNum(item.value);
             } else if (item.operation == "add") {
-                if (item.index[0] != item.index[1]) {
-                    add++;
-                }
+                add++;
             } else if (item.operation == 'del') {
-                if (item.index[0] != item.index[1]) {
-                    del++;
-                }
+                del += getPathsNum(item.value);
+            } else if (item.operation == 'updated') {
+                updated += getPathsNum(item.value);
             }
         })
     } else {
         unchanged = getPathsNum(arr1)
     }
 
-    similarity = Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
-    reader(list, similarity + '???')
+    similarity = Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100;
     return {
         unchanged,
         add,
@@ -166,39 +163,3 @@ export function reader(list, flag) {
     }
 
 };
-
-
-[{
-    "operation": "del",
-    "value": {
-        "name": "child1-1",
-        "text": "111",
-        "uuu": "123",
-        "oo": "00"
-    },
-    "index": [0, 0]
-}, {
-    "operation": "del",
-    "value": {
-        "name": "child1-2",
-        "text": "222",
-        "uuu": "555"
-    },
-    "index": [1, 0]
-}, {
-    "operation": "add",
-    "value": {
-        "name": "child1-1",
-        "text": "111",
-        "uuu": "123"
-    },
-    "index": [2, 0]
-}, {
-    "operation": "add",
-    "value": {
-        "name": "child1-2",
-        "text": "222",
-        "uuu": "555"
-    },
-    "index": [2, 1]
-}]

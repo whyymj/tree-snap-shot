@@ -1,5 +1,9 @@
 export default {
     list: {
-        key: 'id'
+        key: '_id',
+        mapSimilarityForDiff: 0.6
+    },
+    map: {
+
     }
 }
