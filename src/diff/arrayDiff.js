@@ -7,6 +7,7 @@ import {
     similarity
 } from '../util/equal.js'
 import config from '../config/index.js'
+import Logger from '../log/index.js'
 
 function getListValue(data, key) {
     if (data.get) {
@@ -173,7 +174,7 @@ function mergeOperation(list) {
     }
     return newList
 }
-export const myersDiffHandler = function(arr1, arr2, path, type, resultObj = [], handler, options = {}) {
+export const myersDiffHandler = function(arr1, arr2, path, type, handler) {
 
     let diff = myers(arr1, arr2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
@@ -190,13 +191,13 @@ export const myersDiffHandler = function(arr1, arr2, path, type, resultObj = [],
             diff.forEach((item) => {
                 if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
                     if (!shallowEqual(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]))) {
-                        handler(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]), path.push(item.index[0]), type.push(getDataType(getListValue(arr1, item.index[0]), true)), resultObj, handler, options)
+                        handler(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]), path.push(item.index[0]), type.push(getDataType(getListValue(arr1, item.index[0]), true)), handler)
                     }
                 }
             })
         }
 
-        resultObj.push({
+        Logger.add({
             path,
             type,
             operation: 'myers-diff',
@@ -205,7 +206,7 @@ export const myersDiffHandler = function(arr1, arr2, path, type, resultObj = [],
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
             if (!shallowEqual(item, getListValue(arr2, index))) {
-                handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), resultObj, handler, options)
+                handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), handler)
             }
         })
     }

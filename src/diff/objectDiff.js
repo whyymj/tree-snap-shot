@@ -8,6 +8,7 @@ import {
 import {
     deepEqual
 } from "../util/equal.js";
+import Logger from '../log/index.js'
 
 export function isNotInThePath(path, key, floor) {
     if (path && path.get(floor) !== undefined && path.get(floor) != key) {
@@ -22,18 +23,17 @@ export function isNotInThePath(path, key, floor) {
  * @param obj2 可能修改过的对象
  * @param path 到达该节点的路径，值为key
  * @param type 到达该节点的路径，值为父节点类型
- * @param resultObj 对比出的差异，即最终结果
  * @param path 筛选用的路径，不在进行路径外的差异对比
  * @param handler 下一层的处理函数
  * 
  * @returns {{}} 包含所有差异的数组
  */
-export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handler, options = {}) {
+export function objectDiffHandler(obj1, obj2, path, type, handler) {
 
     obj2.map((val, key) => {
         if (!isNull(val)) {
             if (isNull(obj1.get(key))) { //新增的字段
-                resultObj.push({
+                Logger.add({
                     path: path.push(key),
                     operation: 'add',
                     type: type.push(getDataType(obj1, true)),
@@ -53,9 +53,9 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handle
             if (!deepEqual(val, val2)) {
                 //将变化过的属性挂载到返回对象中
                 if (!isNull(val2)) {
-                    handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), resultObj, handler, options)
+                    handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), handler)
                 } else {
-                    resultObj.push({
+                    Logger.add({
                         path: path.push(key),
                         operation: 'delete',
                         type: type.push(getDataType(obj1, true)),
@@ -63,12 +63,10 @@ export function objectDiffHandler(obj1, obj2, path, type, resultObj = [], handle
                             from: deepClone(val),
                             to: undefined,
                         }
-                    });
+                    })
                 }
             }
 
         }
     });
-
-    return resultObj
 }

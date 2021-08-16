@@ -1,9 +1,11 @@
-export default {
-    list: {
+class Config {
+
+    list = {
         key: '_id',
         mapSimilarityForDiff: 0.6
-    },
-    map: {
-
+    }
+    set(options){
+        
     }
 }
+export default new Config()

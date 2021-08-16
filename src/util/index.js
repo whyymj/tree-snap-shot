@@ -32,13 +32,13 @@ function isPlainObject(value) {
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutable = function(value) {
+export const isImmutable = function (value) {
     return Immutable.isImmutable(value)
 }
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutableStructure = function(value) {
+export const isImmutableStructure = function (value) {
     return (
         typeof value === 'object' &&
         (Immutable.isImmutable(value) || Array.isArray(value) || isPlainObject(value))
@@ -155,7 +155,7 @@ export function statisticListSteps(arr1, arr2, list) {
 export function reader(list, flag) {
     try {
 
-        let res = JSON.stringify(Immutable.fromJS(list).toJS())
+        let res = JSON.stringify(list)
         console.log(flag, '>>>>>>> ', res)
         return res
     } catch (e) {

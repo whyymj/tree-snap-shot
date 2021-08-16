@@ -14,38 +14,37 @@ import Immutable from 'immutable'
 import {
     getDataType,
     isImmutableStructure,
-    reader
 } from '../util/index'
+import Logger from '../log/index.js'
+import Config from '../config/index.js'
 /**
  * 
  * @param {老数据} data1 
  * @param {新数据} data2 
  * @param {递归遍历的当前路径} path 
  * @param {路径经过的数据类型} type 
- * @param {最终结果存储} resultObj 
- * @param {回调函数} handler 
- * @param {其他配置} options 
+ * @param {回调函数} handler
  * @returns void(0)
  */
-function differs(data1, data2, path, type, resultObj, handler, options) {
+function differs(data1, data2, path, type, handler) {
     if (isImmutableStructure(data1) && isImmutableStructure(data2)) {
         data1 = Immutable.fromJS(data1);
         data2 = Immutable.fromJS(data2);
-        if(Immutable.is(data1, data2)){
+        if (Immutable.is(data1, data2)) {
             return
         }
         let dataType = getDataType(data1)
         if (dataType == getDataType(data2)) {
             if (dataType == 'Immutable List') {
-                arrayDiff(data1, data2, path, type, resultObj, handler, options);
+                arrayDiff(data1, data2, path, type, handler);
             } else if (dataType == 'Immutable Map') {
-                objectDiff(data1, data2, path, type, resultObj, handler, options);
+                objectDiff(data1, data2, path, type, handler);
             }
             return
         }
     }
     if (!deepEqual(data1, data2)) {
-        resultObj.push({
+        Logger.add({
             path,
             type: type.push(getDataType(data1, true)),
             operation: 'update',
@@ -53,7 +52,7 @@ function differs(data1, data2, path, type, resultObj, handler, options) {
                 from: deepClone(data1),
                 to: deepClone(data2),
             }
-        });
+        })
     }
 
 }
@@ -65,9 +64,7 @@ function differs(data1, data2, path, type, resultObj, handler, options) {
  * @returns 
  */
 export function diff(data1, data2, options = {}) {
-    let result = []; //最终的对比结果存在这里
-    let path = options.path || [];
-    options.path = (path.length ? Immutable.List(path) : null)
-    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), result, differs, options);
-    return result;
+    Config.set(options)
+    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
+    return Logger.getLogs();
 }
