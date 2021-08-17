@@ -1,8 +1,9 @@
+
+const immutable = require('immutable')
 const {
     similarity,
     diff,
 } = require('./dist/index')
-const Immutable = require('immutable')
 
 
 let data1 = [1, 2, {
@@ -65,7 +66,7 @@ console.log(diff({
             uuu: '555'
         }
     ]
-}), ';;;;;;;;;;;;;')
+}).getLogs(), ';;;;;;;;;;;;;')
 
 // console.log(diff([1, 2, 3, 4, 5, 6], [0, 1, 22, 3, 34, 5, 56, 6, 7]))
 console.log('@##########################@');

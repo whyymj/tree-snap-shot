@@ -17,6 +17,11 @@ module.exports = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".js", ".json"]
     },
+    externals: {
+        immutable: 'commonjs2 immutable',
+        isobject: 'commonjs2 isobject',
+        'kind-of': 'commonjs2 kind-of',
+    },
     module: {
         rules: [
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
