@@ -43,8 +43,11 @@ function differs(data1, data2, path, type, handler) {
             return
         }
     }
+    /**
+     * immutable无法转化的数据类型单独处理
+     */
     if (!deepEqual(data1, data2)) {
-        Logger.record({
+        Logger.add({
             path,
             type: type.push(getDataType(data1, true)),
             operation: 'update',
@@ -64,9 +67,9 @@ function differs(data1, data2, path, type, handler) {
  * @returns 
  */
 export function diff(data1, data2, options = {}) {
-    Logger.clear()
-    Logger.clear()
-    Config.set(options)
-    differs(Immutable.fromJS(data1), Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
-    return Logger.getLogs();
+    data1 = Immutable.fromJS(data1)
+    Logger.init(data1);
+    Config.set(options);
+    differs(data1, Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
+    return Logger;
 }

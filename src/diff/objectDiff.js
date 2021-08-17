@@ -10,12 +10,6 @@ import {
 } from "../util/equal.js";
 import Logger from '../snap-shot/index.js'
 
-export function isNotInThePath(path, key, floor) {
-    if (path && path.get(floor) !== undefined && path.get(floor) != key) {
-        return true
-    }
-    return false
-}
 /**
  * 找到两个相同结构的对象的差异内容，并返回包含所有差异的数组
  * 注意对象内的值只能是简单类型，复杂类型不考虑
@@ -29,11 +23,10 @@ export function isNotInThePath(path, key, floor) {
  * @returns {{}} 包含所有差异的数组
  */
 export function objectDiffHandler(obj1, obj2, path, type, handler) {
-
     obj2.map((val, key) => {
         if (!isNull(val)) {
             if (isNull(obj1.get(key))) { //新增的字段
-                Logger.record({
+                Logger.add({
                     path: path.push(key),
                     operation: 'add',
                     type: type.push(getDataType(obj1, true)),
@@ -51,11 +44,10 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
         let val2 = obj2.get(key)
         if (!isNull(val)) {
             if (!deepEqual(val, val2)) {
-                //将变化过的属性挂载到返回对象中
-                if (!isNull(val2)) {
+                if (!isNull(val2)) {//可能变化了的值
                     handler(val, val2, path.push(key), type.push(getDataType(obj1, true)), handler)
-                } else {
-                    Logger.record({
+                } else {//删除的字段
+                    Logger.add({
                         path: path.push(key),
                         operation: 'delete',
                         type: type.push(getDataType(obj1, true)),

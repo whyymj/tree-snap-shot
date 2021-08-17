@@ -4,8 +4,8 @@ class Config {
         key: '_id',
         mapSimilarityForDiff: 0.6
     }
-    set(options){
-        
+    set(options) {
+
     }
 }
 export default new Config()

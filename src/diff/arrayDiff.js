@@ -9,16 +9,9 @@ import {
 import config from '../config/index.js'
 import Logger from '../snap-shot/index.js'
 
-function getListValue(data, key) {
-    if (data.get) {
-        return data.get(key + '')
-    }
-    return data[key]
-}
-
 export function myers(stra, strb, equal = (a, b) => a === b) {
-    let n = stra.length || stra.size;
-    let m = strb.length || strb.size;
+    let n = stra.size;
+    let m = strb.size;
     let snakes;
     let v = {
         '1': 0
@@ -47,7 +40,7 @@ export function myers(stra, strb, equal = (a, b) => a === b) {
                 let xEnd = xMid
                 let yEnd = yMid
 
-                while (xEnd < n && yEnd < m && equal(getListValue(stra, xEnd), getListValue(strb, yEnd))) {
+                while (xEnd < n && yEnd < m && equal(stra.get(xEnd), strb.get(yEnd))) {
                     xEnd++
                     yEnd++
                 }
@@ -114,7 +107,7 @@ function getRes(snakes, stra, strb) {
             for (let j = 0; j < s; j++) {
                 args.push({
                     operation: '',
-                    value: getListValue(stra, j),
+                    value: stra.get(j),
                     index: [j, yOffset]
                 })
                 yOffset++
@@ -125,7 +118,7 @@ function getRes(snakes, stra, strb) {
         if (m - s == 1) { //删掉的值
             args.push({
                 operation: 'del',
-                value: getListValue(stra, s),
+                value: stra.get(s),
                 index: [s, yOffset]
             })
             large = m
@@ -133,7 +126,7 @@ function getRes(snakes, stra, strb) {
         } else {
             args.push({
                 operation: 'add',
-                value: getListValue(strb, yOffset),
+                value: strb.get(yOffset),
                 index: [s, yOffset]
             })
             yOffset++
@@ -143,7 +136,7 @@ function getRes(snakes, stra, strb) {
         for (let i = 0; i < e - large; i++) {
             args.push({
                 operation: '',
-                value: getListValue(stra, large + i),
+                value: stra.get(large + i),
                 index: [large + i, yOffset],
             })
             yOffset++
@@ -174,30 +167,28 @@ function mergeOperation(list) {
     }
     return newList
 }
-export const myersDiffHandler = function(arr1, arr2, path, type, handler) {
+export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
 
     let diff = myers(arr1, arr2, (a, b) => {
-        if (isPrimitive(a) || isPrimitive(b)) {
+        if (isPrimitive(a) || isPrimitive(b)) { //简单值比较
             return a === b
-        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
+        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) { //标识字段比较
             return a.get(config.list.key) === b.get(config.list.key)
-        } else { //引用数据类型 
+        } else { //引用数据类型，结构比较
             return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
         }
     })
 
     if (diff.length) {
-        if (typeof handler == 'function') {
-            diff.forEach((item) => {
-                if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
-                    if (!shallowEqual(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]))) {
-                        handler(getListValue(arr1, item.index[0]), getListValue(arr2, item.index[1]), path.push(item.index[0]), type.push(getDataType(getListValue(arr1, item.index[0]), true)), handler)
-                    }
+        diff.forEach((item) => {
+            if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
+                if (!shallowEqual(arr1.get(item.index[0]), arr2.get(item.index[1]))) {
+                    handler(arr1.get(item.index[0]), arr2.get(item.index[1]), path.push(item.index[0]), type.push(getDataType(arr1.get(item.index[0]), true)), handler)
                 }
-            })
-        }
+            }
+        })
 
-        Logger.record({
+        Logger.add({
             path,
             type,
             operation: 'myers-diff',
@@ -205,8 +196,8 @@ export const myersDiffHandler = function(arr1, arr2, path, type, handler) {
         });
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
-            if (!shallowEqual(item, getListValue(arr2, index))) {
-                handler(item, getListValue(arr2, index), path.push(index), type.push(getDataType(item, true)), handler)
+            if (!shallowEqual(item, arr2.get(index))) {
+                handler(item, arr2.get(index), path.push(index), type.push(getDataType(item, true)), handler)
             }
         })
     }
