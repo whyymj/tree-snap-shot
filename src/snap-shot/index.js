@@ -1,60 +1,43 @@
 import Immutable from 'immutable'
-class Logger {
-    logs;
-    repositories;
-    index = {};
 
+function valueToJs(obj) {
+    if (Immutable.isImmutable(obj.to) || Immutable.isImmutable(obj.from)) {
+        return Immutable.fromJS(obj).toJS()
+    }
+    return obj
+}
+
+function getLogs(logs) {
+    return logs.map(item => {
+        return {
+            ...item,
+            value: valueToJs(item.value)
+        }
+    })
+}
+class Logs {
+    logs = [];
+}
+const Log = new Logs();
+class Logger { 
     constructor() {
-        this.logs = Immutable.List([])
-        this.repositories = Immutable.List([])
+        Log.logs = []
     }
     add(log) {
-        this.logs.push(log)
+        Log.logs.push(log);
     }
     init(data) {
-        this.logs.clear();
-        this.repositories.clear();
-        this.logs.push({
+        Log.logs = [];
+        Log.logs.push({
             operation: 'init',
             value: data
         })
     }
-    commit(commit) {
-        if (!commit) {
-            throw new Error('commit必须是字符串')
-        } else {
-            if (this.index[commit]) {
-                throw new Error('commit不能重复')
-            } else {
-                this.index[commit] = this.repositories.length;
-                this.repositories.push({
-                    timestamp: new Date().getTime(),
-                    commit,
-                    reflogs: this.logs
-                })
-            }
-
-        }
+    getLogs() {
+        return getLogs(Log.logs)
     }
-    reset(commit) {
-        if (this.index[commit] && this.index[commit].lenth) {
-            return
-        }
-    }
-    log() {
-        return Immutable.fromJS(this.logs).toJS()
-    }
-    push(){
-
-    }
-    pull(){
-
-    }
-    branch(name){
-
-    }
-    checkout(name){
-
+    setLogs(logs) {
+        Log.logs = logs;
     }
 }
 export default new Logger();

@@ -1,9 +1,7 @@
 import {
     diff
 } from './diff/index.js'
-import {
-    reader
-} from './util/index'
+
 import {
     similarity
 } from './util/equal'
@@ -20,10 +18,8 @@ import {
     var TreeDiff = {
         diff,
         similarity,
-        reader
     }
     exports.default = TreeDiff;
     exports.diff = diff
-    exports.reader = reader
     exports.similarity = similarity
 })))

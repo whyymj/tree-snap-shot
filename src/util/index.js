@@ -152,14 +152,3 @@ export function statisticListSteps(arr1, arr2, list) {
         similarity
     };
 }
-export function reader(list, flag) {
-    try {
-
-        let res = JSON.stringify(list)
-        console.log(flag, '>>>>>>> ', res)
-        return res
-    } catch (e) {
-        console.log(flag, '>>>>>>> ', list)
-    }
-
-};

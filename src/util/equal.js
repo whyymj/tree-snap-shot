@@ -1,4 +1,4 @@
-import equal from 'deep-equal'
+
 import Immutable from "immutable"
 import {
     isPrimitive,
@@ -7,7 +7,6 @@ import {
     getDataType,
     getPathsNum,
     statisticListSteps,
-    reader
 } from './index'
 import {
     myers
@@ -29,7 +28,7 @@ export const deepEqual = function(obj1, obj2) {
     if (Immutable.isImmutable(obj2)) {
         obj2 = obj2.toJS()
     }
-    return equal(obj1, obj2)
+    return config.unImmutableData.equal(obj1, obj2);
 };
 /**
  * 浅比较两个对象是否相似
@@ -99,15 +98,13 @@ function listLike(obj1, obj2) {
     let unchanged = 0; //完全相同的key：value
 
     let df = myers(obj1, obj2, (a, b) => {
-        let res = false
         if (isPrimitive(a) || isPrimitive(b)) {
-            res = a === b
+            return a === b
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
-            res = a.get(config.list.key) === b.get(config.list.key)
+            return a.get(config.list.key) === b.get(config.list.key)
         } else { //引用数据类型
-            res = similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
+            return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
         }
-        return res
     })
 
     let res = statisticListSteps(obj1, obj2, df);

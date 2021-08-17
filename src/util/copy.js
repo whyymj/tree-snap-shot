@@ -1,4 +1,5 @@
-import cloneDeep from 'deepcopy'
+
+import config from '../config/index.js'
 import Immutable from 'immutable'
 import {
     isDom,
@@ -12,8 +13,8 @@ export const deepClone = function (data) {
         return data
     }
     let copy = Immutable.fromJS(data)
-    if (!Immutable.isImmutable(copy)) { //无法转化为immutable的数据用deepcopy
-        return cloneDeep(data)
+    if (!Immutable.isImmutable(copy)) { //无法转化为immutable的数据用自定义copy
+        return config.unImmutableData.copy(data)
     }
     return copy
 };
