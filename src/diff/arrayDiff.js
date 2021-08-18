@@ -153,7 +153,7 @@ function mergeOperation(list) {
         item = list[i];
         next = list[i + 1];
 
-        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1] && next.index[0] == next.index[1]) {
+        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1] && item.index[0] == item.index[1]) {
             newList.push({
                 ...item,
                 value: [item.value, next.value],
@@ -187,7 +187,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
                 }
             }
         })
-
+console.log(diff,'????')
         Logger.add({
             path,
             type,
