@@ -84,12 +84,11 @@ function mergeLog(data = {}, operations) {
 
 
 console.log('@##########################@')
-console.log(diff(data1, data2).getDiffs().toString(), ';;;;;;;;;;;;;')
+// console.log(diff(data1, data2).getDiffs().toString(), ';;;;;;;;;;;;;')
 
-console.log(JSON.stringify(mergeLog({}, diff(data1, data2).getDiffs())))
-// console.log(diff([1, 2, 3, 4, 5, 6], [0, 1, 22, 3, 34, 5, 56, 6, 7]))
+console.log(JSON.stringify(mergeLog({}, diff(data1, data2).getDiffs())));
+
 console.log('@##########################@');
-
 [{
     "path": ["id"],
     "type": ["object", "string"],
@@ -116,7 +115,7 @@ console.log('@##########################@');
     }
 }, {
     "path": ["children", 0],
-    "type": ["object", "array"],
+    "type": ["object", "array", "array"],
     "operation": "myers-diff",
     "steps": [{
         "operation": "del",
@@ -129,7 +128,7 @@ console.log('@##########################@');
     }]
 }, {
     "path": ["children", 1, "name"],
-    "type": ["object", "object", "object", "string"],
+    "type": ["object", "array", "object", "string"],
     "operation": "update",
     "value": {
         "from": "child1-name",
@@ -137,7 +136,7 @@ console.log('@##########################@');
     }
 }, {
     "path": ["children"],
-    "type": ["object"],
+    "type": ["object", "array"],
     "operation": "myers-diff",
     "steps": [{
         "operation": "add",

@@ -67,8 +67,8 @@ export function isPrimitive(value) {
  */
 export function getDataType(data, toJS = false) {
     if (Immutable.isImmutable(data)) {
-        let type = data.toString()
-        if (toJS) {
+        let type = data.toString();
+        if (toJS) { 
             if (type.indexOf('Map') == 0) {
                 return 'object'
             } else if (type.indexOf('List') == 0) {

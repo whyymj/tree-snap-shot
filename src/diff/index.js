@@ -36,9 +36,9 @@ function differs(data1, data2, path, type, handler) {
         let dataType = getDataType(data1)
         if (dataType == getDataType(data2)) {
             if (dataType == 'Immutable List') {
-                arrayDiff(data1, data2, path, type, handler);
+                arrayDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
             } else if (dataType == 'Immutable Map') {
-                objectDiff(data1, data2, path, type, handler);
+                objectDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
             }
             return
         }
