@@ -38,7 +38,7 @@ export const deepEqual = function(obj1, obj2) {
  * @returns 
  */
 function mapLike(obj1, obj2) {
-    let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
+    let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
     let unchanged = 0; //完全相同的key：value
@@ -59,7 +59,7 @@ function mapLike(obj1, obj2) {
                     unchanged += getPathsNum(val);
                 } else {
                     let res = similarity(val, filteKeys[key]);
-                    updated += res.updated;
+                    update += res.update;
                     del += res.del;
                     add += res.add;
                     unchanged += res.unchanged;
@@ -79,9 +79,9 @@ function mapLike(obj1, obj2) {
         unchanged,
         add,
         del,
-        updated,
-        changed: add + del + updated,
-        similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
+        update,
+        changed: add + del + update,
+        similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
 }
 /**
@@ -92,7 +92,7 @@ function mapLike(obj1, obj2) {
  * @returns 
  */
 function listLike(obj1, obj2) {
-    let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
+    let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
     let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
     let unchanged = 0; //完全相同的key：value
@@ -116,9 +116,9 @@ function listLike(obj1, obj2) {
         unchanged,
         add,
         del,
-        updated,
-        changed: add + del + updated,
-        similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
+        update,
+        changed: add + del + update,
+        similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
 }
 /**
@@ -130,7 +130,7 @@ function listLike(obj1, obj2) {
 export function similarity(data1, data2) {
 
     function check(obj1, obj2) {
-        let updated = 0; //obj2与obj1的差异个数，包括：修改的总个数
+        let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
         let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
         let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
         let unchanged = 0; //完全相同的key：value
@@ -148,27 +148,27 @@ export function similarity(data1, data2) {
                     cacher.set(obj1, obj2, res);
                 }
 
-                updated += res.updated;
+                update += res.update;
                 add += res.add;
                 del += res.del;
                 unchanged += res.unchanged;
             } else {
-                updated += getPathsNum(obj1)
+                update += getPathsNum(obj1)
             }
 
         } else if (obj1 === obj2) {
             unchanged += 1
         } else {
-            updated += 1
+            update += 1
         }
 
         let res = {
             unchanged,
             add,
             del,
-            updated,
-            changed: add + del + updated,
-            similarity: Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100
+            update,
+            changed: add + del + update,
+            similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
         }
 
         return res

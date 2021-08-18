@@ -157,7 +157,7 @@ function mergeOperation(list) {
             newList.push({
                 ...item,
                 value: [item.value, next.value],
-                operation: 'updated'
+                operation: 'update'
             })
             i++;
         } else if (item ?.operation) {

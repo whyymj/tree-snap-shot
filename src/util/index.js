@@ -122,7 +122,7 @@ export function statisticListSteps(arr1, arr2, list) {
     let unchanged = 0,
         add = 0,
         del = 0,
-        updated = 0,
+        update = 0,
         changed = 0,
         similarity = 0
 
@@ -134,20 +134,20 @@ export function statisticListSteps(arr1, arr2, list) {
                 add++;
             } else if (item.operation == 'del') {
                 del += getPathsNum(item.value);
-            } else if (item.operation == 'updated') {
-                updated += getPathsNum(item.value);
+            } else if (item.operation == 'update') {
+                update += getPathsNum(item.value);
             }
         })
     } else {
         unchanged = getPathsNum(arr1)
     }
 
-    similarity = Math.round(unchanged / (add + del + updated + unchanged) * 100) / 100;
+    similarity = Math.round(unchanged / (add + del + update + unchanged) * 100) / 100;
     return {
         unchanged,
         add,
         del,
-        updated,
+        update,
         changed,
         similarity
     };
