@@ -71,5 +71,5 @@ export function diff(data1, data2, options = {}) {
     Logger.init(data1);
     Config.set(options);
     differs(data1, Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
-    return Logger;
+    return Logger.getLog();
 }

@@ -1,7 +1,52 @@
 import Immutable from 'immutable'
+import {
+    getDataType
+} from '../util/index.js'
+
+function mergeLog(data = {}, operations, opers = ['add', 'update']) {
+
+    if (typeof data == 'object') {
+        if (!Array.isArray(operations)) {
+            operations = [operations]
+        }
+        operations.map(oper => {
+            if (opers.includes(oper.operation)) {
+                let paths = oper.path;
+                let types = oper.type;
+                let child = data;
+                paths.map((val, key) => {
+                    let type = Immutable.isImmutable(types) ? types.get(key + 1) : types[key + 1]
+                    if (type == 'object' || type == 'array') {
+                        if (!child[val]) {
+                            child[val] = {}
+                        }
+                        child = child[val]
+                    } else {
+                        child[val] = Immutable.isImmutable(oper.value.to) ? oper.value.to.toJS() : oper.value.to;
+                    }
+                })
+
+            }
+
+        })
+    } else {
+        throw new Error('请输入Object')
+    }
+    return data
+}
+
 class Logs {
+    mergeLog = {}
     logs = [];
     push(log) { //增
+        switch (log.operation) {
+            case 'add':
+                this.mergeLog.add = mergeLog(this.mergeLog.add, log, ['add']);
+                return
+            case 'update':
+                this.mergeLog.update = mergeLog(this.mergeLog.update, log, ['update']);
+                return
+        }
         this.logs.push(log)
     }
     remove(callback) { //删
@@ -18,9 +63,14 @@ class Logs {
         })
     }
     check() { //查
-        return this.logs.filter(item => {
+        return [...Object.keys(this.mergeLog).map(k => {
+            return {
+                operation: 'deep-merge-' + k,
+                value: this.mergeLog[k]
+            }
+        }), ...this.logs.filter(item => {
             return item.operation != 'init';
-        })
+        })]
     }
     init(list = []) {
         if (Array.isArray(list)) {
@@ -31,81 +81,22 @@ class Logs {
     }
 }
 
-function mergeLog(data = {}, operations) {
 
-    if (typeof data == 'object') {
-
-        operations.forEach(oper => {
-            let path = oper.path;
-            let type = oper.type;
-            let child = data;
-            path.map((value, key) => {
-                if (typeof child[value] != 'object') {
-                    if (type.get(`${key+1}`) == 'array') {
-                        child[value] = []
-                    } else if (type.get(`${key+1}`) == 'object') {
-                        child[value] = {}
-                    }
-                }
-                child = child[value];
-            })
-            if (oper.operation == 'add') {
-                child[path.get(path.size - 1)] = Immutable.isImmutable(oper.value.to) ? oper.value.to.toJS() : oper.value.to;
-
-            } else if (oper.operation == 'update') {
-                child[path.get(path.size - 1)] = Immutable.isImmutable(oper.value.to) ? oper.value.to.toJS() : oper.value.to;
-
-            } else if (oper.operation == 'delete') {
-                delete child[path.get(path.size - 1)];
-
-            }
-        })
-    } else {
-        throw new Error('请输入Object')
-    }
-    return data
-
-}
 const Log = new Logs();
+
+function toString() {
+    return JSON.stringify(this.map(item => {
+        return Immutable.fromJS(item).toJS()
+    }))
+}
 class Logger {
-    cache = {
-        add: null,
-        del: null,
-        update: null,
-    }
     constructor() {
         Log.init()
     }
+    reset(data = {}, operations) {
+        return mergeLog(data, operations)
+    }
     add(log) {
-        // if (!this.cache.add) {
-        //     if (log.path.type.get(0) == 'object') {
-        //         this.cache.add = {}
-        //     } else if (log.path.type.get(0) == 'array') {
-        //         this.cache.add = []
-        //     } else {
-        //         throw new Error('未知的类型')
-        //     }
-        // }
-        // if (log.operation == 'add') {
-
-        //     log.path.map((value, key) => {
-        //         log.path.type.get(`${key+1}`)
-        //         if (log.path.type.get(0) == 'object') {
-        //             this.cache.add = {}
-        //         } else if (log.path.type.get(0) == 'array') {
-        //             this.cache.add = []
-        //         } else {
-        //             throw new Error('未知的类型')
-        //         }
-        //     })
-
-        // } else if (log.operation == 'del') {
-
-        // } else if (log.operation == 'update') {
-
-        // } else {
-
-        // }
         Log.push(log);
     }
     init(data) {
@@ -115,11 +106,9 @@ class Logger {
             value: data
         })
     }
-    getDiffs() {
+    getLog() {
         let logs = Log.check()
-        logs.toString = () => JSON.stringify(logs.map(item => {
-            return Immutable.fromJS(item).toJS()
-        }))
+        logs.toString = toString;
         return logs
     }
     setLogs(logs) {

@@ -50,7 +50,7 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
                     Logger.add({
                         path: path.push(key),
                         operation: 'delete',
-                        type,
+                        type:type.push(getDataType(val,true)),
                         value: {
                             from: deepClone(val),
                             to: undefined,

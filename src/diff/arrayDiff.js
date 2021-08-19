@@ -187,7 +187,6 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
                 }
             }
         })
-console.log(diff,'????')
         Logger.add({
             path,
             type,

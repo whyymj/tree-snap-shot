@@ -1,6 +1,7 @@
 import {
     diff
 } from './diff/index.js'
+import snapShot from './snap-shot/index.js'
 
 import {
     similarity
@@ -18,8 +19,11 @@ import {
     var TreeDiff = {
         diff,
         similarity,
+        log:snapShot
     }
     exports.default = TreeDiff;
     exports.diff = diff
     exports.similarity = similarity
+    exports.log = snapShot
+    
 })))
