@@ -108,8 +108,8 @@ function getRes(snakes, stra, strb) {
             for (let j = 0; j < s; j++) {
                 args.push({//不能去掉，方便统计
                     operation: '',
-                    // value: stra.get(j),
-                    // index: [j, yOffset]
+                    value: stra.get(j),
+                    index: [j, yOffset]
                 })
                 yOffset++
             }
@@ -119,7 +119,7 @@ function getRes(snakes, stra, strb) {
         if (m - s == 1) { //删掉的值
             args.push({
                 operation: 'del',
-                // value: stra.get(s),
+                value: stra.get(s),
                 index: [s, yOffset]
             })
             large = m
@@ -137,8 +137,8 @@ function getRes(snakes, stra, strb) {
         for (let i = 0; i < e - large; i++) {
             args.push({//不能去掉，方便统计
                 operation: '',
-                // value: stra.get(large + i),
-                // index: [large + i, yOffset],
+                value: stra.get(large + i),
+                index: [large + i, yOffset],
             })
             yOffset++
         }
@@ -201,7 +201,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
                     handler(arr1.get(item.index[0]), arr2.get(item.index[1]), path.push(item.index[0]), type, handler)
                 }
             }
-        })
+        }) 
         Logger.add({
             path,
             type,

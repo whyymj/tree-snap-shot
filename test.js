@@ -1,11 +1,10 @@
 const immutable = require('immutable')
-
 const {
     similarity,
     diff,
-    log
+    log,
+    deepmerge
 } = require('./dist/index')
-
 let data1 = {
     id: 'data1-id',
     name: 'data1-name',
@@ -48,57 +47,62 @@ let data2 = {
 }
 
 console.log('@##########################@');
-diff(data1, data2)
-console.log(log.getLog().toString(), ';;;;;;;;;;;;;');
+// diff(data1, data2)
+// console.log(log.getDiff().toString(), ';;;;;;;;;;;;;');
 
 console.log('@##########################@');
-let opers =[
-    ["update", {
-        "id": "data2-id",
-        "name": "data2-name",
-        "data": {
-            "test": "2"
-        }
-    }],
-    ["add", {
-        "data": {
-            "newadd": "uu"
-        }
-    }],
-    ["del", ["data", "id"]],
-    ["myers-diff", ["children"],
+let opers = [
+    // ["update", {
+    //     "id": "data2-id",
+    //     "name": "data2-name",
+    //     "data": {
+    //         "test": "2"
+    //     },
+    //     "children": {
+    //         "1": {
+    //             "name": "child1-1-name"
+    //         }
+    //     }
+    // }],
+    // ["add", {
+    //     "data": {
+    //         "newadd": "uu"
+    //     }
+    // }],
+    // ["del", ["data", "id"]],
+    ["myers-diff", ["children", 0],
         [
-            ["add", 3, {
-                "id": "child3-id",
-                "name": "child2-name"
-            }]
+            ["update", 5, 3]
         ]
-    ]
+    ],
+    // ["myers-diff", ["children"],
+    //     [
+    //         ["add", 3, {
+    //             "id": "child3-id",
+    //             "name": "child2-name"
+    //         }]
+    //     ]
+    // ]
 ]
-function restoreMap(data, operations) {
+
+function restoreMap(data, oper) {
     if (typeof data == 'object') {
-        if (!Array.isArray(operations)) {
-            operations = [operations]
-        }
-        operations.map(oper => {
-            if (oper[0] == 'add' || oper[0] == 'update') {
-                config.unImmutableData.merge(data, oper[1])
-            } else if (oper[0] == 'del') {
-                oper.slice(1).map(paths => {
-                    let child = data;
-                    paths.map((val, key) => {
-                        if (key < ((paths.length || paths.size) - 1)) {
-                            child = child[val]
-                        } else {
-                            delete child[val]
-                        }
-                    })
+        if (oper[0] == 'add' || oper[0] == 'update') {
+            return deepmerge(data, oper[1])
+        } else if (oper[0] == 'del') {
+            oper.slice(1).map(paths => {
+                let child = data;
+                paths.map((val, key) => {
+                    if (key < ((paths.length || paths.size) - 1)) {
+                        child = child[val]
+                    } else {
+
+                        delete child[val]
+                    }
                 })
+            })
 
-            }
-
-
-        })
+        }
     } else {
         throw new Error('请输入Object')
     }
@@ -113,6 +117,7 @@ function restoreList(data, opers = []) {
         list = list[path]
     })
     opers[2].forEach(item => {
+        console.log('Restoring', item, '>>>>>>>>', list)
         if (item[0] == 'add') {
             list.splice(item[1] + point, 0, ...item.slice(2))
             point += item.length - 2
@@ -122,7 +127,7 @@ function restoreList(data, opers = []) {
                 point--
             }
         } else if (item[0] == 'update') {
-            list[item.index + point] = item.value
+            list[item[1] + point] = item[2]
         }
     })
 }
@@ -130,12 +135,11 @@ function restoreList(data, opers = []) {
 function restore(data, opers) {
     opers.map(oper => {
         if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
-            restoreMap(data)
+            restoreMap(data, oper)
         } else if (oper[0] == 'myers-diff') {
-            restoreList(data)
+            restoreList(data, oper)
         }
     })
     return data
 }
-console.log(restore(data1,opers))
-
+console.log(restore(data1, opers))
