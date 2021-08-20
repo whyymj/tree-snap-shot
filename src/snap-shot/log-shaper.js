@@ -1,5 +1,6 @@
-
-export function shaper(data = {}, operations, opers = ['add', 'update']) {
+import Immutable from 'immutable'
+import deepmerge from '../util/merge'
+export function shape(data = {}, operations, opers = ['add', 'update']) {
     if (typeof data == 'object') {
         if (!Array.isArray(operations)) {
             operations = [operations]
