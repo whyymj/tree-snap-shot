@@ -47,41 +47,31 @@ let data2 = {
     ]
 }
 
+console.log('@##########################@');
+diff(data1, data2)
+console.log(log.getLog().toString(), ';;;;;;;;;;;;;');
 
-let li1=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-let li2=[1, '12', '22', '32', 2, 4, 8, 9, 'oooo']
-function resore(list, opers = []) {
-
-    let point = 0;
-    opers.forEach(item => {
-        if (item[0] == 'add') {
-            list.splice(item[1] + point, 0, ...item.slice(2))
-            point += item.length - 2
-        } else if (item[0] == 'del') {
-            for (let i = 1; i < item.length; i++) {
-                list.splice(item[i] + point, 1);
-                point--
-            }
-        } else if (item[0] == 'update') {
-            list[item.index + point] = item.value
+console.log('@##########################@');
+[
+    ["update", {
+        "id": "data2-id",
+        "name": "data2-name",
+        "data": {
+            "test": "2"
         }
-    })
-    return list;
-}
-let opers = [{
-    "path": [],
-    "type": ["array"],
-    "operation": "myers-diff",
-    "steps": [
-        ["del", 0],
-        ["add", 2, "12", "22", "32"],
-        ["del", 3, 5, 6, 7],
-        ["add", 10, "oooo"]
+    }],
+    ["add", {
+        "data": {
+            "newadd": "uu"
+        }
+    }],
+    ["del", ["data", "id"]],
+    ["myers-diff", ["children"],
+        [
+            ["add", 3, {
+                "id": "child3-id",
+                "name": "child2-name"
+            }]
+        ]
     ]
-}]
-console.log('@##########################@');
-// diff(li1, li2)
-// console.log(log.getLog().toString(), ';;;;;;;;;;;;;')
-
-console.log(immutable.is(immutable.fromJS(resore(li1, opers[0].steps)),immutable.fromJS(li2)))
-console.log('@##########################@');
+]

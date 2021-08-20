@@ -68,7 +68,7 @@ export function isPrimitive(value) {
 export function getDataType(data, toJS = false) {
     if (Immutable.isImmutable(data)) {
         let type = data.toString();
-        if (toJS) { 
+        if (toJS) {
             if (type.indexOf('Map') == 0) {
                 return 'object'
             } else if (type.indexOf('List') == 0) {
@@ -151,4 +151,14 @@ export function statisticListSteps(arr1, arr2, list) {
         changed,
         similarity
     };
+}
+
+export function reader(data) {
+    try {
+        data=Immutable.fromJS(data).toJS();
+        console.log(JSON.stringify(data))
+    } catch (e) {
+        console.log(data)
+    }
+
 }

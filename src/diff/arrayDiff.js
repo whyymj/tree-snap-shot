@@ -1,6 +1,7 @@
 import {
     isPrimitive,
     getDataType,
+    reader
 } from '../util/index.js'
 import {
     shallowEqual,
@@ -105,11 +106,11 @@ function getRes(snakes, stra, strb) {
 
         if (index === 0 && s !== 0) { //不变的值
             for (let j = 0; j < s; j++) {
-                // args.push({
-                //     operation: '',
-                //     value: stra.get(j),
-                //     index: [j, yOffset]
-                // })
+                args.push({//不能去掉，方便统计
+                    operation: '',
+                    // value: stra.get(j),
+                    // index: [j, yOffset]
+                })
                 yOffset++
             }
         }
@@ -118,7 +119,7 @@ function getRes(snakes, stra, strb) {
         if (m - s == 1) { //删掉的值
             args.push({
                 operation: 'del',
-                value: stra.get(s),
+                // value: stra.get(s),
                 index: [s, yOffset]
             })
             large = m
@@ -134,11 +135,11 @@ function getRes(snakes, stra, strb) {
 
         // 不变
         for (let i = 0; i < e - large; i++) {
-            // args.push({
-            //     operation: '',
-            //     value: stra.get(large + i),
-            //     index: [large + i, yOffset],
-            // })
+            args.push({//不能去掉，方便统计
+                operation: '',
+                // value: stra.get(large + i),
+                // index: [large + i, yOffset],
+            })
             yOffset++
         }
     })
@@ -155,28 +156,28 @@ function mergeOperation(list) {
         next = list[i + 1];
 
         if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1]) {
-            newList.push(['update',item.index[0],next.value]);
+            newList.push(['update', item.index[0], next.value]);
             i++;
         } else if (item ?.operation) {
             tmp = [item.operation, item.index[0]]
-            if(item ?.operation == 'add'){
-                if(newList[newList.length-1]?.[0] == 'add'&&newList[newList.length-1][1]==item.index[0]){
-                    tmp=newList[newList.length-1]
-                }else{
+            if (item ?.operation == 'add') {
+                if (newList[newList.length - 1] ?. [0] == 'add' && newList[newList.length - 1][1] == item.index[0]) {
+                    tmp = newList[newList.length - 1]
+                } else {
                     newList.push(tmp)
                 }
                 tmp.push(item.value)
-            }else if(item ?.operation == 'del'){
-                if(newList[newList.length-1]?.[0] == 'del'){
-                    tmp=newList[newList.length-1]
+            } else if (item ?.operation == 'del') {
+                if (newList[newList.length - 1] ?. [0] == 'del') {
+                    tmp = newList[newList.length - 1]
                     tmp.push(item.index[0])
-                }else{
+                } else {
                     newList.push(tmp)
                 }
-            }else{
+            } else {
                 newList.push(tmp)
             }
-            
+
         }
 
     }
@@ -193,7 +194,6 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
             return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
         }
     })
-
     if (diff.length) {
         diff.forEach((item) => {
             if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
