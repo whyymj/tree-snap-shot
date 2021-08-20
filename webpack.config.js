@@ -21,6 +21,7 @@ module.exports = {
         immutable: 'commonjs2 immutable',
         isobject: 'commonjs2 isobject',
         'kind-of': 'commonjs2 kind-of',
+        'deepmerge': 'commonjs2 deepmerge',
     },
     module: {
         rules: [

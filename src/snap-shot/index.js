@@ -1,7 +1,6 @@
 import Immutable from 'immutable'
-import {
-    getDataType
-} from '../util/index.js'
+import config from '../config/index.js'
+
 
 function mergeLog(data = {}, operations, opers = ['add', 'update']) {
     if (typeof data == 'object') {
@@ -35,30 +34,27 @@ function mergeLog(data = {}, operations, opers = ['add', 'update']) {
 }
 
 function restoreMap(data, operations) {
-
     if (typeof data == 'object') {
         if (!Array.isArray(operations)) {
             operations = [operations]
         }
         operations.map(oper => {
-            if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
-                let paths = oper.path;
-                let types = oper.type;
-                let child = data;
-                paths.map((val, key) => {
-                    let type = Immutable.isImmutable(types) ? types.get(key + 1) : types[key + 1]
-                    if (key < (paths.length || paths.size)-1) {
-                        child = child[val]
-                    } else {
-                        if (oper[0] == 'del') {
-                            delete child[val]
+            if (oper[0] == 'add' || oper[0] == 'update') {
+                config.unImmutableData.merge(data, oper[1])
+            } else if (oper[0] == 'del') {
+                oper.slice(1).map(paths => {
+                    let child = data;
+                    paths.map((val, key) => {
+                        if (key < ((paths.length || paths.size) - 1)) {
+                            child = child[val]
                         } else {
-                            child[val] = Immutable.isImmutable(oper.value.to) ? oper.value.to.toJS() : oper.value.to;
+                            delete child[val]
                         }
-                    }
+                    })
                 })
 
             }
+
 
         })
     } else {
@@ -67,9 +63,14 @@ function restoreMap(data, operations) {
     return data;
 }
 
-function restoreList(list, opers = []) {
+function restoreList(data, opers = []) {
     let point = 0;
-    opers.forEach(item => {
+    let paths = opers[1]
+    let list = data
+    paths.map(path => {
+        list = list[path]
+    })
+    opers[2].forEach(item => {
         if (item[0] == 'add') {
             list.splice(item[1] + point, 0, ...item.slice(2))
             point += item.length - 2
@@ -80,6 +81,16 @@ function restoreList(list, opers = []) {
             }
         } else if (item[0] == 'update') {
             list[item.index + point] = item.value
+        }
+    })
+}
+
+function restore(data, opers) {
+    opers.map(oper => {
+        if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
+            restoreMap(data)
+        } else if (oper[0] == 'myers-diff') {
+            restoreList(data)
         }
     })
 }
