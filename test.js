@@ -47,60 +47,41 @@ let data2 = {
     ]
 }
 
-let opers = [{
-    "operation": "deep-merge-update",
-    "value": {
-        "id": "data2-id",
-        "name": "data2-name",
-        "data": {
-            "test": "2"
-        },
-        "children": {
-            "1": {
-                "name": "child1-1-name"
+
+let li1=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+let li2=[1, '12', '22', '32', 2, 4, 8, 9, 'oooo']
+function resore(list, opers = []) {
+
+    let point = 0;
+    opers.forEach(item => {
+        if (item[0] == 'add') {
+            list.splice(item[1] + point, 0, ...item.slice(2))
+            point += item.length - 2
+        } else if (item[0] == 'del') {
+            for (let i = 1; i < item.length; i++) {
+                list.splice(item[i] + point, 1);
+                point--
             }
+        } else if (item[0] == 'update') {
+            list[item.index + point] = item.value
         }
-    }
-}, {
-    "operation": "deep-merge-add",
-    "value": {
-        "data": {
-            "newadd": "uu"
-        }
-    }
-}, {
-    "path": ["data", "id"],
-    "operation": "delete",
-    "type": ["object", "object", "string"],
-    "value": {
-        "from": "data"
-    }
-}, {
-    "path": ["children", 0],
-    "type": ["object", "array", "array"],
+    })
+    return list;
+}
+let opers = [{
+    "path": [],
+    "type": ["array"],
     "operation": "myers-diff",
-    "steps": [{
-        "operation": "update",
-        "value": [6, 3],
-        "index": [5, 5]
-    }]
-}, {
-    "path": ["children"],
-    "type": ["object", "array"],
-    "operation": "myers-diff",
-    "steps": [{
-        "operation": "add",
-        "value": {
-            "id": "child3-id",
-            "name": "child2-name"
-        },
-        "index": [3, 3]
-    }]
+    "steps": [
+        ["del", 0],
+        ["add", 2, "12", "22", "32"],
+        ["del", 3, 5, 6, 7],
+        ["add", 10, "oooo"]
+    ]
 }]
-
-
 console.log('@##########################@');
-diff(data1, data2)
-console.log(log.getLog().toString(), ';;;;;;;;;;;;;')
+// diff(li1, li2)
+// console.log(log.getLog().toString(), ';;;;;;;;;;;;;')
 
+console.log(immutable.is(immutable.fromJS(resore(li1, opers[0].steps)),immutable.fromJS(li2)))
 console.log('@##########################@');
