@@ -8,17 +8,15 @@ class Logs {
         delete: [],
     }
     logs = [];
-    cache = []
+    cache = [];
     push(log) { //增
         switch (log.operation) {
             case 'add':
-                this.mergeLog.add = shape(this.mergeLog.add, log, ['add']);
-                return;
             case 'update':
-                this.mergeLog.update = shape(this.mergeLog.update, log, ['update']);
+                this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
                 return;
             case 'delete':
-                this.mergeLog.delete.push(log.path);
+                this.mergeLog.delete.push(log.path); //['delete', path1, path2,...]
                 return;
             case 'myers-diff':
                 this.logs.push([log.operation, log.path, log.steps]);
@@ -29,11 +27,21 @@ class Logs {
         }
     }
     remove(callback) { //删
+        for (let k in this.mergeLog) {
+            if (callback(['' + k, this.mergeLog[k]]) === false) {
+                delete this.mergeLog[k];
+            }
+        }
         this.logs = this.logs.filter(item => {
             return callback(item) === false ? false : true;
         })
     }
     update(callback) { //改
+        for (let k in this.mergeLog) {
+            if (callback(this.mergeLog[k]) === false) {
+                delete this.mergeLog[k];
+            }
+        }
         this.logs = this.logs.map(item => {
             return callback(item) || item
         })
@@ -87,12 +95,16 @@ class Logger {
     }
     reset() {
         let logs = Log.getLogs();
-         
+
         if (logs[0][0] == 'init') {
-            let data = Immutable.fromJS(logs[0][1]).toJS();
-            let res= reset(data, Immutable.fromJS(logs).toJS())
+            let data = logs[0][1];
+            if (Immutable.isImmutable(data)) {
+                data = data.toJS();
+            }
+
+            let res = reset(data, Immutable.fromJS(logs).toJS())
             return res
-        }else{
+        } else {
             throw new Error('初始化出错了！')
         }
 
@@ -109,7 +121,7 @@ class Logger {
     }
     getDiff() {
         let logs = Log.getDiff();
-        logs.toString = toString;
+        Object.getPrototypeOf(logs).toString = toString;
         return logs;
     }
     setLogs(logs) {

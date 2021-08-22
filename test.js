@@ -48,6 +48,7 @@ let data2 = {
 
 console.log('@##########################@');
 diff(data1, data2)
-console.log(immutable.is(immutable.fromJS(log.reset()),immutable.fromJS(data2)), ';;;;;;;;;;;;;');
+let res=log.reset() 
+console.log(immutable.is(immutable.fromJS(res),immutable.fromJS(data2)), ';;;;;;;;;;;;;');
 
 console.log('@##########################@');
