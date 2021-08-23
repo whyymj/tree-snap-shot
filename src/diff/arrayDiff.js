@@ -192,7 +192,6 @@ function mergeOperation(list) {
             }
         }
     }
-    console.log(newList,'listlistlist')
     return newList
 }
 export const myersDiffHandler = function (arr1, arr2, path, type, handler) {

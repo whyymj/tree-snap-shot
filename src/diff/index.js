@@ -66,10 +66,11 @@ function differs(data1, data2, path, type, handler) {
  * @param {*} options 
  * @returns 
  */
-export function diff(data1, data2, options = {}) {
+export function compare(data1, data2, options = {}) {
     data1 = Immutable.fromJS(data1)
     Logger.init(data1);
     Config.set(options);
     differs(data1, Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
+    Logger.compare=compare;
     return Logger;
 }

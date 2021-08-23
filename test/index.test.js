@@ -131,5 +131,5 @@ test('diff(obj1, obj2)', () => {
             "index": [3, 3]
         }]
     }]
-    expect(diff(data1, data2).getLogs()).toEqual(result);
+    expect(diff(data1, data2).exportLog()).toEqual(result);
 });

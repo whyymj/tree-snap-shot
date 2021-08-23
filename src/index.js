@@ -1,32 +1,32 @@
 import {
-    diff
+    compare
 } from './diff/index.js'
-import snapShot from './snap-shot/index.js'
+import Logger from './snap-shot/index.js'
 
 import {
     similarity
 } from './util/equal'
-import deepmerge from './util/merge'
-
 
 /**
  * 全局挂载
  */
-(function(global, factory) {
+(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
         typeof define === 'function' && define.amd ? define(['exports'], factory) :
         (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.TreeDiff = {}));
-}(this, (function(exports) {
+}(this, (function (exports) {
     var TreeDiff = {
-        diff,
+        compare,
         similarity,
-        deepmerge,
-        log: snapShot
+        getDiff: Logger.getDiff,
+        replay: Logger.replay,
+        exportLog: Logger.exportLog,
     }
     exports.default = TreeDiff;
-    exports.diff = diff
-    exports.deepmerge = deepmerge
+    exports.compare = compare
     exports.similarity = similarity
-    exports.log = snapShot
+    exports.getDiff = Logger.getDiff
+    exports.replay = Logger.replay
+    exports.exportLog = Logger.exportLog
 
 })))
