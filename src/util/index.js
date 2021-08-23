@@ -123,7 +123,6 @@ export function statisticListSteps(arr1, arr2, list) {
         add = 0,
         del = 0,
         update = 0,
-        changed = 0,
         similarity = 0
 
     if (list.length) {
@@ -148,7 +147,6 @@ export function statisticListSteps(arr1, arr2, list) {
         add,
         del,
         update,
-        changed,
         similarity
     };
 }

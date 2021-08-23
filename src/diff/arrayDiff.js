@@ -143,23 +143,35 @@ function getRes(snakes, stra, strb) {
             yOffset++
         }
     })
-    return args;
+    let item = null;
+    let next = null;
+    let newList = []
+    for (let i = 0; i < args.length; i++){
+        item = args[i];
+        next = args[i + 1];
+        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1]) {//合并add del
+            newList.push({
+                operation: 'update',
+                value:next.value, 
+                index:item.index
+            });
+            i++;
+        } else{
+            newList.push(item)
+        }
+    }
+    return newList;
 }
 
 function mergeOperation(list) {
     let item = null;
-    let next = null;
     let newList = []
     let tmp;
     for (let i = 0; i < list.length; i++) {
         item = list[i];
-        next = list[i + 1];
-
-        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1]) {
-            newList.push(['update', item.index[0], next.value]);
-            i++;
-        } else if (item ?.operation) {
+        if (item ?.operation) {
             tmp = [item.operation, item.index[0]]
+            
             if (item ?.operation == 'add') {
                 if (newList[newList.length - 1] ?. [0] == 'add' && newList[newList.length - 1][1] == item.index[0]) {
                     tmp = newList[newList.length - 1]
@@ -175,12 +187,12 @@ function mergeOperation(list) {
                     newList.push(tmp)
                 }
             } else {
+                tmp.push(item.value)
                 newList.push(tmp)
             }
-
         }
-
     }
+    console.log(newList,'listlistlist')
     return newList
 }
 export const myersDiffHandler = function (arr1, arr2, path, type, handler) {

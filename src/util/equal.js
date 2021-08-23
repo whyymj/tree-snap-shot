@@ -80,7 +80,6 @@ function mapLike(obj1, obj2) {
         add,
         del,
         update,
-        changed: add + del + update,
         similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
 }
@@ -111,13 +110,12 @@ function listLike(obj1, obj2) {
     add += res.add;
     del += res.del;
     unchanged += res.unchanged;
-
+    update += res.update;
     return {
         unchanged,
         add,
         del,
         update,
-        changed: add + del + update,
         similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
 }
@@ -167,7 +165,6 @@ export function similarity(data1, data2) {
             add,
             del,
             update,
-            changed: add + del + update,
             similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
         }
 

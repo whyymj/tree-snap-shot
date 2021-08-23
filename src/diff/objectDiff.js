@@ -49,7 +49,7 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
                 } else {//删除的字段
                     Logger.add({
                         path: path.push(key),
-                        operation: 'delete',
+                        operation: 'del',
                         type:type.push(getDataType(val,true)),
                         value: {
                             from: deepClone(val),

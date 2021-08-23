@@ -4,19 +4,15 @@ import {
     reset
 } from './log-shaper'
 class Logs {
-    mergeLog = {
-        delete: [],
-    }
+    mergeLog = {}
     logs = [];
     cache = [];
     push(log) { //增
         switch (log.operation) {
             case 'add':
             case 'update':
+            case 'del':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
-                return;
-            case 'delete':
-                this.mergeLog.delete.push(log.path); //['delete', path1, path2,...]
                 return;
             case 'myers-diff':
                 this.logs.push([log.operation, log.path, log.steps]);
@@ -28,7 +24,7 @@ class Logs {
     }
     remove(callback) { //删
         for (let k in this.mergeLog) {
-            if (callback(['' + k, this.mergeLog[k]]) === false) {
+            if (callback(['' + k, this.mergeLog[k]]) === false) { 
                 delete this.mergeLog[k];
             }
         }
@@ -56,8 +52,8 @@ class Logs {
             return this.cache
         }
         let result = this.logs.filter(item => item[0] != 'init');
-        if (this.mergeLog.delete.length) {
-            result.unshift(['del', ...this.mergeLog.delete])
+        if (this.mergeLog.del) {
+            result.unshift(['del', this.mergeLog.del])
         }
         if (this.mergeLog.add) {
             result.unshift(['add', this.mergeLog.add])
@@ -65,6 +61,7 @@ class Logs {
         if (this.mergeLog.update) {
             result.unshift(['update', this.mergeLog.update])
         }
+        console.log('merge',this.mergeLog)
         result.unshift(this.logs[0])
         this.cache = result;
         return result;
@@ -73,9 +70,7 @@ class Logs {
     init(list = []) {
         if (Array.isArray(list)) {
             this.logs = list
-            this.mergeLog = {
-                delete: [],
-            }
+            this.mergeLog = {}
             this.cache = []
         }
     }
