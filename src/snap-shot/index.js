@@ -8,7 +8,6 @@ class Logs {
     log = [];
     cache = [];
     push(log) { //增
-        console.log(Immutable.fromJS(this.log).toJS(),'<<<<<<<<<<<',Immutable.fromJS(this.mergeLog).toJS())
         switch (log.operation) {
             case 'add':
             case 'update':
@@ -68,10 +67,11 @@ class Logs {
     }
 
     init(list = []) {
+        this.mergeLog = {}
+        this.cache = []
+        this.log = []
         if (Array.isArray(list)) {
             this.log = list
-            this.mergeLog = {}
-            this.cache = list
         }
     }
 }
@@ -116,14 +116,14 @@ class Logger {
         }
         return this
     }
-    getDiff(callback) {
+    getDiff(callback) {//供人查看
         let log = Log.getDiff();
         Object.getPrototypeOf(log).toString = toString;
-        typeof callback == 'function' && callback(log)
+        typeof callback == 'function' && callback(Immutable.fromJS(log).toJS())
         return this;
     }
-    exportLog(callback) {
-        let tmp=Log.exportLog();
+    exportLog(callback) {//导出记录
+        let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
         typeof callback == 'function' && callback(tmp)
         return this;

@@ -1,34 +1,17 @@
-import {
-    diff
-} from '../dist/index'
+import differ from '../dist/index'
 
-test('diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])', () => {
-    expect(diff([1, 2, 4, 3], [0, 1, 2, 6, 5, 3, 4])).toEqual([{
-        "path": [],
-        "type": [],
-        "operation": "myers-diff",
-        "steps": [{
-            "operation": "add",
-            "value": 0,
-            "index": [0, 0]
-        }, {
-            "operation": "del",
-            "value": 4,
-            "index": [2, 3]
-        }, {
-            "operation": "add",
-            "value": 6,
-            "index": [3, 3]
-        }, {
-            "operation": "add",
-            "value": 5,
-            "index": [3, 4]
-        }, {
-            "operation": "add",
-            "value": 4,
-            "index": [4, 6]
-        }]
-    }]);
+test(`compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three'])`, () => {
+    differ.compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three']).getDiff(record => {
+        expect(record).toEqual([
+            ["myers-diff", [],
+                [
+                    ["del", 0],
+                    ["add", 4, 9],
+                    ["update", 5, "three"]
+                ]
+            ]
+        ]);
+    })
 });
 
 test('diff(obj1, obj2)', () => {
@@ -36,100 +19,107 @@ test('diff(obj1, obj2)', () => {
         id: 'data1-id',
         name: 'data1-name',
         data: {
-            test: 1
+            test: 1,
+            id: 'data',
+            uuu: 1
         },
         children: [
-            [1, 2, 3, 4, 5, 6], {
+            ['one', 'two', 'three', 'four', 'five', 'six'],
+            [{
                 id: 'child1-id',
                 name: 'child1-name',
+                www: '',
+                testdel: 'del',
+                testadd: 'add',
             }, {
                 id: 'child2-id',
                 name: 'child2-name',
-            }
+                testdel: 'del',
+                testadd: 'add',
+            }]
         ]
     }
     let data2 = {
         id: 'data2-id',
         name: 'data2-name',
         data: {
-            test: '2'
+            test: '2',
+            newadd: 'uu',
+            ooo: 'ooo',
+            opop: 123
         },
         children: [
-            [1, 2, 3, 4, 5, 3], {
+            ['two', 'three', 'four', 'five', 'three'],
+            [{
                 id: 'child1-id',
                 name: 'child1-1-name',
+                www: '',
+                testdel: 'del',
+                testadd: 'add',
             }, {
                 id: 'child2-id',
                 name: 'child2-name',
+                testadd: 'add',
             }, {
                 id: 'child3-id',
-                name: 'child2-name',
-            }
+                name: 'child3-name',
+            }, {
+                id: 'child4-id',
+                name: 'child4-name',
+            }]
         ]
     }
-    let result = [{
-        "path": ["id"],
-        "type": ["object", "string"],
-        "operation": "update",
-        "value": {
-            "from": "data1-id",
-            "to": "data2-id"
-        }
-    }, {
-        "path": ["name"],
-        "type": ["object", "string"],
-        "operation": "update",
-        "value": {
-            "from": "data1-name",
-            "to": "data2-name"
-        }
-    }, {
-        "path": ["data", "test"],
-        "type": ["object", "object", "number"],
-        "operation": "update",
-        "value": {
-            "from": 1,
-            "to": "2"
-        }
-    }, {
-        "path": ["children", 0],
-        "type": ["object", "array"],
-        "operation": "myers-diff",
-        "steps": [{
-            "operation": "del",
-            "value": 6,
-            "index": [5, 5]
-        }, {
-            "operation": "add",
-            "value": 3,
-            "index": [6, 5]
-        }]
-    }, {
-        "path": ["children"],
-        "type": ["object"],
-        "operation": "myers-diff",
-        "steps": [{
-            "operation": "del",
-            "value": {
-                "id": "child1-id",
-                "name": "child1-name"
+
+    let result = [
+        ["update", {
+            "id": "data2-id",
+            "name": "data2-name",
+            "data": {
+                "test": "2"
             },
-            "index": [1, 1]
-        }, {
-            "operation": "add",
-            "value": {
-                "id": "child1-id",
-                "name": "child1-1-name"
-            },
-            "index": [2, 1]
-        }, {
-            "operation": "add",
-            "value": {
-                "id": "child3-id",
-                "name": "child2-name"
-            },
-            "index": [3, 3]
-        }]
-    }]
-    expect(diff(data1, data2).exportLog()).toEqual(result);
+            "children": {
+                "1": {
+                    "0": {
+                        "name": "child1-1-name"
+                    }
+                }
+            }
+        }],
+        ["add", {
+            "data": {
+                "newadd": "uu",
+                "ooo": "ooo",
+                "opop": 123
+            }
+        }],
+        ["del", {
+            "data": ["id", "uuu"],
+            "children": {
+                "1": {
+                    "1": "testdel"
+                }
+            }
+        }],
+        ["myers-diff", ["children", 0],
+            [
+                ["del", 0],
+                ["update", 5, "three"]
+            ]
+        ],
+        ["myers-diff", ["children", 1],
+            [
+                ["add", 2, {
+                    "id": "child3-id",
+                    "name": "child3-name"
+                }, {
+                    "id": "child4-id",
+                    "name": "child4-name"
+                }]
+            ]
+        ]
+    ];
+    differ.compare(data1, data2).getDiff(record => {
+         expect(record).toEqual(result);
+    })
+    
 });

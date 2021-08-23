@@ -11,7 +11,6 @@ class CacheResult {
     }
     get(a, b) {
         if (Immutable.isImmutable(a) && Immutable.isImmutable(b)) {
-            console.log('read cache',this.cache[Immutable.hash(a) + '_' + Immutable.hash(b)])
             return this.cache[Immutable.hash(a) + '_' + Immutable.hash(b)]
         } else if (Immutable.isImmutable(a) && b === undefined) {
             return this.cache[Immutable.hash(a)]

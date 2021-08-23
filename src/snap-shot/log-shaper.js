@@ -111,10 +111,15 @@ function restoreList(data, opers = []) {
 
 export function reset(data, opers) {
     opers.map(oper => {
+        if (Immutable.isImmutable(oper)) {
+            oper = Immutable.toJS(oper)
+        } else if (Immutable.isImmutable(oper[1])) {
+            oper[1] = Immutable.toJS(oper[1])
+        }
         if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
-            restoreMap(data, oper)
+            return restoreMap(data, oper)
         } else if (oper[0] == 'myers-diff') {
-            restoreList(data, oper)
+            return restoreList(data, oper)
         }
     })
     return data
