@@ -8,6 +8,7 @@ class Logs {
     log = [];
     cache = [];
     push(log) { //增
+        console.log(Immutable.fromJS(this.log).toJS(),'<<<<<<<<<<<',Immutable.fromJS(this.mergeLog).toJS())
         switch (log.operation) {
             case 'add':
             case 'update':
@@ -122,7 +123,9 @@ class Logger {
         return this;
     }
     exportLog(callback) {
-        typeof callback == 'function' && callback(Log.exportLog())
+        let tmp=Log.exportLog();
+        Object.getPrototypeOf(tmp).toString = toString;
+        typeof callback == 'function' && callback(tmp)
         return this;
     }
 }

@@ -9,7 +9,8 @@ let data1 = {
         uuu: 1
     },
     children: [
-        ['one', 'two', 'three', 'four', 'five', 'six'], {
+        ['one', 'two', 'three', 'four', 'five', 'six'],
+        [{
             id: 'child1-id',
             name: 'child1-name',
             www: '',
@@ -20,7 +21,7 @@ let data1 = {
             name: 'child2-name',
             testdel: 'del',
             testadd: 'add',
-        }
+        }]
     ]
 }
 let data2 = {
@@ -33,7 +34,8 @@ let data2 = {
         opop: 123
     },
     children: [
-        ['two', 'three', 'four', 'five', 'three'], {
+        ['two', 'three', 'four', 'five', 'three'],
+        [{
             id: 'child1-id',
             name: 'child1-1-name',
             www: '',
@@ -49,7 +51,7 @@ let data2 = {
         }, {
             id: 'child4-id',
             name: 'child4-name',
-        }
+        }]
     ]
 }
 
@@ -59,15 +61,60 @@ let record1 = [],
     record2 = [];
 differ.compare(data1, data2).exportLog(record => {
     record1 = record;
+    console.log('record1:::', record1.toString())
     data1 = ['one', 'two', 'three', 'four', 'five', 'six'];
     data2 = ['two', 'three', 'four', 'five', 'three']
 }).compare(data1, data2).exportLog(record => {
     record2 = record;
+    console.log('record2:::', record2.toString())
 }).replay(data => {
-    console.log('replay1:::',data)
-},record1).replay(data => {
-    console.log('replay2:::',data)
-},record2)
+    console.log('replay1:::', data)
+}, record1).replay(data => {
+    console.log('replay2:::', data)
+}, record2)
 
 
 console.log('@##########################@');
+[
+    ["init", {
+        "id": "data1-id",
+        "name": "data1-name",
+        "data": {
+            "test": 1,
+            "id": "data",
+            "uuu": 1
+        },
+        "children": [
+            ["one", "two", "three", "four", "five", "six"],
+            [{
+                "id": "child1-id",
+                "name": "child1-name",
+                "www": "",
+                "testdel": "del",
+                "testadd": "add"
+            }, {
+                "id": "child2-id",
+                "name": "child2-name",
+                "testdel": "del",
+                "testadd": "add"
+            }]
+        ]
+    }],
+    ["myers-diff", ["children", 0],
+        [
+            ["del", 0],
+            ["update", 5, "three"]
+        ]
+    ],
+    ["myers-diff", ["children", 1],
+        [
+            ["add", 2, {
+                "id": "child3-id",
+                "name": "child3-name"
+            }, {
+                "id": "child4-id",
+                "name": "child4-name"
+            }]
+        ]
+    ]
+]
