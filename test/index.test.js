@@ -1,5 +1,16 @@
 import differ from '../dist/index'
-
+function createObject(deep, breadth, end = 'end') {
+    var tmp;
+    var result = tmp = {};
+    for (var i = 0; i < deep; i++) {
+        tmp = tmp['data'] = {};
+        for (var j = 0; j < breadth; j++) {
+            tmp[j] = j
+        }
+    }
+    tmp['end'] = end
+    return result;
+}
 test(`compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three'])`, () => {
     differ.compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three']).getDiff(record => {
         expect(record).toEqual([

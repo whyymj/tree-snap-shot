@@ -1,3 +1,4 @@
+'use strict';
 const immutable = require('immutable')
 const deepequal = require('deep-equal')
 const differ = require('./dist/index')
@@ -7,8 +8,15 @@ let data1 = {
     data: {
         test: 1,
         id: 'data',
-        uuu: 1
+        uuu: 1,
+        aa: {
+            id: 'aa'
+        },
+        bb: {
+            id: 'aa'
+        }
     },
+    info: {},
     children: [
         ['one', 'two', 'three', 'four', 'five', 'six'],
         [{
@@ -25,36 +33,7 @@ let data1 = {
         }]
     ]
 };
-let y = {
-    "id": "data1-id",
-    "name": "data1-name",
-    "data": {
-        "test": 1,
-        "id": "data",
-        "uuu": 1
-    },
-    "children": [
-        ["two", "three", "four", "five", "three"],
-        [{
-            "id": "child1-id",
-            "name": "child1-name",
-            "www": "",
-            "testdel": "del",
-            "testadd": "add"
-        }, {
-            "id": "child2-id",
-            "name": "child2-name",
-            "testdel": "del",
-            "testadd": "add"
-        }, {
-            "id": "child3-id",
-            "name": "child3-name"
-        }, {
-            "id": "child4-id",
-            "name": "child4-name"
-        }]
-    ]
-};
+
 let data2 = {
     id: 'data2-id',
     name: 'data2-name',
@@ -86,51 +65,36 @@ let data2 = {
     ]
 }
 
-
+// function createObject(deep, breadth, end = 'end') {
+//     var tmp;
+//     var result = tmp = {};
+//     for (var i = 0; i < deep; i++) {
+//         tmp = tmp['data'] = {};
+//         for (var j = 0; j < breadth; j++) {
+//             tmp[j] = j
+//         }
+//     }
+//     tmp['end'] = end
+//     return result;
+// }
+// data1 = createObject(100, 30, 'data1')
+// data2 = createObject(100, 30, 'data2')
 console.log('@##########################@');
 let record1 = [],
     record2 = [];
-let li1 = ['one', 'two', 'three', 'four', 'five', 'six'];
-let li2 = ['two', 'three', 'four', 9, 'five', 'three']
+// let li1 = ['one', 'two', 'three', 'four', 'five', 'six'];
+// let li2 = ['two', 'three', 'four', 9, 'five', 'three']
 differ.compare(data1, data2).exportLog(record => {
     record1 = record;
     console.log('record1::', record1.toString());
-}).compare(li1, li2).exportLog(record => {
-    record2 = record;
-    // console.log('record2::', record)
 }).replay(data => {
     console.log('data1 ::', deepequal(data, data2))
-}, record1).replay(data => {
-    console.log('data2 ::', deepequal(data, li2))
-}, record2)
-
+    console.log('data2 ::', JSON.stringify(data))
+}, record1)
+// console.log('data::',  differ.similarity(data1, data2))
 
 console.log('@##########################@');
 [
-    ["init", {
-        "id": "data1-id",
-        "name": "data1-name",
-        "data": {
-            "test": 1,
-            "id": "data",
-            "uuu": 1
-        },
-        "children": [
-            ["one", "two", "three", "four", "five", "six"],
-            [{
-                "id": "child1-id",
-                "name": "child1-name",
-                "www": "",
-                "testdel": "del",
-                "testadd": "add"
-            }, {
-                "id": "child2-id",
-                "name": "child2-name",
-                "testdel": "del",
-                "testadd": "add"
-            }]
-        ]
-    }],
     ["update", {
         "id": "data2-id",
         "name": "data2-name",
@@ -153,7 +117,8 @@ console.log('@##########################@');
         }
     }],
     ["del", {
-        "data": ["id", "uuu"],
+        "data": ["id", "uuu", "aa", "bb"],
+        "info": {},
         "children": {
             "1": {
                 "1": "testdel"

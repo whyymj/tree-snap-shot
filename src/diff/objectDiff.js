@@ -45,7 +45,7 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
         if (!isNull(val)) {
             if (!deepEqual(val, val2)) {
                 if (!isNull(val2)) {//可能变化了的值
-                    handler(val, val2, path.push(key), type, handler)
+                    return handler(val, val2, path.push(key), type, handler)
                 } else {//删除的字段
                     Logger.add({
                         path: path.push(key),

@@ -17,6 +17,7 @@ import {
 } from '../util/index'
 import Logger from '../snap-shot/index.js'
 import Config from '../config/index.js'
+
 /**
  * 
  * @param {老数据} data1 
@@ -36,11 +37,10 @@ function differs(data1, data2, path, type, handler) {
         let dataType = getDataType(data1)
         if (dataType == getDataType(data2)) {
             if (dataType == 'Immutable List') {
-                arrayDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
+                return arrayDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
             } else if (dataType == 'Immutable Map') {
-                objectDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
+                return objectDiff(data1, data2, path, type.push(getDataType(data1, true)), handler);
             }
-            return
         }
     }
     /**
@@ -71,6 +71,6 @@ export function compare(data1, data2, options = {}) {
     Logger.init(data1);
     Config.set(options);
     differs(data1, Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);
-    Logger.compare=compare;
+    Logger.compare = compare;
     return Logger;
 }

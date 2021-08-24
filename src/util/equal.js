@@ -1,4 +1,3 @@
-
 import Immutable from "immutable"
 import {
     isPrimitive,
@@ -11,10 +10,9 @@ import {
 import {
     myers
 } from '../diff/arrayDiff'
-
 import config from '../config/index.js'
 import cacher from '../cache/index.js'
-export const deepEqual = function(obj1, obj2) {
+export const deepEqual = function (obj1, obj2) {
     if (isPrimitive(obj1) || isPrimitive(obj2)) {
         return obj1 === obj2;
     }
@@ -70,18 +68,19 @@ function mapLike(obj1, obj2) {
                 } else {
                     del++
                 }
-
             }
         }
     });
 
-    return {
+    let res = {
         unchanged,
         add,
         del,
         update,
         similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
+    cacher.set(obj1, obj2, res);
+    return res;
 }
 /**
  * 浅比较两个数组是否相似
@@ -111,13 +110,15 @@ function listLike(obj1, obj2) {
     del += res.del;
     unchanged += res.unchanged;
     update += res.update;
-    return {
+    res = {
         unchanged,
         add,
         del,
         update,
         similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
     }
+    cacher.set(obj1, obj2, res);
+    return res
 }
 /**
  * 两个tree的结构相似度
@@ -125,53 +126,42 @@ function listLike(obj1, obj2) {
  * @param {new} obj2 新数据
  * @returns 
  */
-export function similarity(data1, data2) {
+export function similarity(obj1, obj2) {
 
-    function check(obj1, obj2) {
-        let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
-        let add = 0; //obj2与obj1的差异个数，包括：增加的总个数
-        let del = 0; //obj2与obj1的差异个数，包括：删除的总个数
-        let unchanged = 0; //完全相同的key：value
-        if (isImmutableStructure(obj1)) { //可转为immutable结构或已经是了的数据
-            obj1 = Immutable.fromJS(obj1);
-            obj2 = Immutable.fromJS(obj2);
-            if (getDataType(obj1) == getDataType(obj2)) {
-                let res = cacher.get(obj1, obj2);
-                if (!res) {
-                    if (getDataType(obj1) == 'Immutable Map') {
-                        res = mapLike(obj1, obj2);
-                    } else if (getDataType(obj1) == 'Immutable List') {
-                        res = listLike(obj1, obj2);
-                    }
-                    cacher.set(obj1, obj2, res);
+    let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
+    let unchanged = 0; //完全相同的key：value
+    if (isImmutableStructure(obj1)) { //可转为immutable结构或已经是了的数据
+        obj1 = Immutable.fromJS(obj1);
+        obj2 = Immutable.fromJS(obj2);
+        if (getDataType(obj1) == getDataType(obj2)) {
+            let res = cacher.get(obj1, obj2);
+            if (!res) {
+                if (getDataType(obj1) == 'Immutable Map') {
+                    return mapLike(obj1, obj2);
+                } else if (getDataType(obj1) == 'Immutable List') {
+                    return listLike(obj1, obj2);
                 }
-
-                update += res.update;
-                add += res.add;
-                del += res.del;
-                unchanged += res.unchanged;
-            } else {
-                update += getPathsNum(obj1)
             }
-
-        } else if (obj1 === obj2) {
-            unchanged += 1
+            return res;
         } else {
-            update += 1
+            update += getPathsNum(obj1)
         }
-
-        let res = {
-            unchanged,
-            add,
-            del,
-            update,
-            similarity: Math.round(unchanged / (add + del + update + unchanged) * 100) / 100
-        }
-
-        return res
+    } else if (obj1 === obj2) {
+        unchanged += 1
+    } else {
+        update += 1
     }
-    return check(data1, data2)
+    let res = {
+        unchanged,
+        add: 0,
+        del: 0,
+        update,
+        similarity: Math.round(unchanged / (update + unchanged) * 100) / 100
+    }
+    cacher.set(obj1, obj2, res);
+    return res
 }
-export const shallowEqual = function(obj1, obj2) {
+
+export const shallowEqual = function (obj1, obj2) {
     return Immutable.is(obj1, obj2)
 };

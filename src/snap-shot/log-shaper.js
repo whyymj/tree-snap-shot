@@ -52,11 +52,11 @@ function traverse(tree, callback, path) {
     }
     for (var key in tree) {
         if (typeof tree[key] == 'object' && !Array.isArray(tree[key])) {
-            return traverse(tree[key], callback, path.push(key))
+            traverse(tree[key], callback, path.push(key))
         } else {
             if (Array.isArray(tree[key])) {
                 tree[key].forEach(item => {
-                    callback(path.push(key).push(item))
+                    return callback(path.push(key).push(item))
                 })
             } else {
                 callback(path.push(key).push(tree[key]))
@@ -72,6 +72,7 @@ function restoreMap(data, oper) {
         } else if (oper[0] == 'del') {
             traverse(oper[1], paths => {
                 let child = data;
+                console.log('>>>>path : ',paths)
                 paths.map((val, key) => {
                     if (key < ((paths.length || paths.size) - 1)) {
                         child = child[val]

@@ -209,7 +209,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
         diff.forEach((item) => {
             if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
                 if (!shallowEqual(arr1.get(item.index[0]), arr2.get(item.index[1]))) {
-                    handler(arr1.get(item.index[0]), arr2.get(item.index[1]), path.push(item.index[0]), type, handler)
+                    return handler(arr1.get(item.index[0]), arr2.get(item.index[1]), path.push(item.index[0]), type, handler)
                 }
             }
         }) 
@@ -222,7 +222,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
             if (!shallowEqual(item, arr2.get(index))) {
-                handler(item, arr2.get(index), path.push(index), type, handler)
+                return handler(item, arr2.get(index), path.push(index), type, handler)
             }
         })
     }
