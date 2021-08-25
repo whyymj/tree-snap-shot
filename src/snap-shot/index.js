@@ -100,7 +100,7 @@ function replay(log, proto) {
     }
 
     let childLogs;
-    let datas = []
+    let datas = [];
     let tmp;
     for (let i = 0; i < log.length; i++) {
         tmp = log[i];
