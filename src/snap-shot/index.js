@@ -136,17 +136,17 @@ class Logger {
     constructor() {
         Log.init()
     }
-    replay(log, proto) {
+    replay(log, proto) { //根据记录前进
         this.proto = replay(log, proto);
         return this
     }
-    rollback(log, endProto) {
+    rollback(log, endProto) { //根据记录回退
         this.reverseLog(log, endProto).exportLog(reverLog => {
             this.replay(reverLog, endProto);
         })
         return this;
     }
-    reverseLog(log, endProto) {
+    reverseLog(log, endProto) { //反转log
         if (Array.isArray(log)) {
             Log.init(log)
         } else {
@@ -169,18 +169,18 @@ class Logger {
         compare(endProto, startProto)
         return this;
     }
-    getDiff(callback) { //供人查看
-        let log = Log.getDiff();
-        Object.getPrototypeOf(log).toString = toString;
-        typeof callback == 'function' && callback(Immutable.fromJS(log).toJS())
-        return this;
-    }
     exportLog(callback) { //导出记录
         let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
         typeof callback == 'function' && callback(tmp)
         return this;
     }
+}
+Logger.prototype.getDiff = function (callback) { //供人查看，用不太到
+    let log = Log.getDiff();
+    Object.getPrototypeOf(log).toString = toString;
+    typeof callback == 'function' && callback(Immutable.fromJS(log).toJS())
+    return this;
 }
 Logger.prototype.init = (data) => {
     Log.init()
