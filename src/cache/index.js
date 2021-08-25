@@ -2,9 +2,9 @@
 import Immutable from "immutable"
 class CacheResult {
     cache = {}
-    set(a, b, res) {
+    set(a, b, c) {
         if (Immutable.isImmutable(a) && Immutable.isImmutable(b)) {
-            this.cache[Immutable.hash(a) + '_' + Immutable.hash(b)] = res
+            this.cache[Immutable.hash(a) + '_' + Immutable.hash(b)] = c
         } else if (Immutable.isImmutable(a) && b !== undefined) {
             this.cache[Immutable.hash(a)] = b
         }
@@ -16,6 +16,9 @@ class CacheResult {
             return this.cache[Immutable.hash(a)]
         }
         return null;
+    }
+    size(){
+        return Object.keys(this.cache).length;
     }
     clear() {
         this.cache = {}

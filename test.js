@@ -80,17 +80,17 @@ let data2 = {
 // data1 = createObject(100, 30, 'data1')
 // data2 = createObject(100, 30, 'data2')
 console.log('@##########################@');
-let record1 = [],
-    record2 = [];
-// let li1 = ['one', 'two', 'three', 'four', 'five', 'six'];
-// let li2 = ['two', 'three', 'four', 9, 'five', 'three']
+let records = []
+let li1 = ['one', 'two', 'three', 'four', 'five', 'six'];
+let li2 = ['two', 'three', 'four', 9, 'five', 'three']
 differ.compare(data1, data2).exportLog(record => {
-    record1 = record;
-    console.log('record1::', record1.toString());
+    records = record;
+}).compare(li1, li2).exportLog(record => {
+    records.push(...record);
 }).replay(data => {
     console.log('data1 ::', deepequal(data, data2))
     console.log('data2 ::', JSON.stringify(data))
-}, record1)
+}, records).getDiff()
 // console.log('data::',  differ.similarity(data1, data2))
 
 console.log('@##########################@');

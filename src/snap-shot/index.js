@@ -95,34 +95,38 @@ class Logger {
             log = Log.exportLog();
         }
 
-        if (!log[0]) {
-            throw new Error('初始化出错了！请输入有效snap-shot')
-        }
-
-        if (log[0][0] == 'init' && typeof log[0][1] == 'object') {
-            let data = log[0][1];
-            if (Immutable.isImmutable(data)) {
-                data = data.toJS();
+        let childLogs;
+        let datas = []
+        for (let i = 0; i < log.length; i++) {
+            if (log[i][0] == 'init') {
+                childLogs = []
+                datas.push(childLogs);
             }
-            let res = reset(data, Immutable.fromJS(log).toJS())
-            typeof callback == 'function' && callback(res)
-        } else {
-            let err = log[0][0]
-            try {
-                throw new Error('初始化出错了！log[0]=' + JSON.stringify(err))
-            } catch (e) {
-                throw new Error('初始化出错了！log[0]=', err)
+            if (Array.isArray(childLogs)) {
+                childLogs.push(log[i]);
             }
         }
+        datas.map(lg=>{
+            if (typeof lg[0][1] == 'object') {
+                let data = lg[0][1];
+                if (Immutable.isImmutable(data)) {
+                    data = data.toJS();
+                }
+                let res = reset(data, Immutable.fromJS(lg).toJS())
+                typeof callback == 'function' && callback(res)
+            }else{
+                typeof callback == 'function' && callback(lg[0][1])
+            }
+        })
         return this
     }
-    getDiff(callback) {//供人查看
+    getDiff(callback) { //供人查看
         let log = Log.getDiff();
         Object.getPrototypeOf(log).toString = toString;
         typeof callback == 'function' && callback(Immutable.fromJS(log).toJS())
         return this;
     }
-    exportLog(callback) {//导出记录
+    exportLog(callback) { //导出记录
         let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
         typeof callback == 'function' && callback(tmp)

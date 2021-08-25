@@ -16,7 +16,10 @@ export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
                 let val;
                 for (let key = 0; key < paths.length; key++) {
                     val = paths[key];
-                    if (oper.operation == 'del' && key == paths.length - 2) {
+                    if (oper.operation == 'del' && paths.length == 1) {
+                        child[val] = null;
+                        break;
+                    } else if (oper.operation == 'del' && key == paths.length - 2) {
                         if (child[val] !== undefined) {
                             if (Array.isArray(child[val])) {
                                 child[val].push(paths[paths.length - 1])
@@ -52,6 +55,10 @@ function traverse(tree, callback, path) {
     }
     for (var key in tree) {
         if (typeof tree[key] == 'object' && !Array.isArray(tree[key])) {
+            if(!tree[key]){
+                callback(path.push(key))
+                continue;
+            }
             traverse(tree[key], callback, path.push(key))
         } else {
             if (Array.isArray(tree[key])) {
@@ -72,7 +79,6 @@ function restoreMap(data, oper) {
         } else if (oper[0] == 'del') {
             traverse(oper[1], paths => {
                 let child = data;
-                console.log('>>>>path : ',paths)
                 paths.map((val, key) => {
                     if (key < ((paths.length || paths.size) - 1)) {
                         child = child[val]
