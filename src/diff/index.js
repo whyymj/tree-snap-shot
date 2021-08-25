@@ -27,7 +27,8 @@ import Config from '../config/index.js'
  * @param {回调函数} handler
  * @returns void(0)
  */
-function differs(data1, data2, path, type, handler) {
+function differs(data1, data2, path, type, handler) { 
+    
     if (isImmutableStructure(data1) && isImmutableStructure(data2)) {
         data1 = Immutable.fromJS(data1);
         data2 = Immutable.fromJS(data2);

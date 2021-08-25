@@ -7,7 +7,6 @@ import {
     similarity
 } from './util/equal'
 import Cache from './cache/index.js'
-
 /**
  * 全局挂载
  */
@@ -31,4 +30,6 @@ import Cache from './cache/index.js'
     exports.replay = Logger.replay
     exports.exportLog = Logger.exportLog
     exports.clearCache = Cache.clear
+    exports.reverseLog = Logger.reverseLog
+    exports.rollback = Logger.rollback
 })))

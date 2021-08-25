@@ -1,4 +1,5 @@
 import differ from '../dist/index'
+
 function createObject(deep, breadth, end = 'end') {
     var tmp;
     var result = tmp = {};
@@ -11,14 +12,20 @@ function createObject(deep, breadth, end = 'end') {
     tmp['end'] = end
     return result;
 }
-test(`compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three'])`, () => {
-    differ.compare(['one', 'two', 'three', 'four', 'five', 'six'], ['two', 'three', 'four', 9, 'five', 'three']).getDiff(record => {
+let li1 = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+let li2 = ['one', 'two', 56, 'five', 'six', 'seven7', 'eight', 'ten', 'nine', 'ooo']
+test(`compare(list1,list2)`, () => {
+    differ.compare(li1, li2).getDiff(record => {
         expect(record).toEqual([
-            ["myers-diff", [],
-                [
-                    ["del", 0],
-                    ["add", 4, 9],
-                    ["update", 5, "three"]
+            [
+                ["myers-diff", [],
+                    [
+                        ["del", 2],
+                        ["update", 3, 56],
+                        ["update", 6, "seven7"],
+                        ["del", 8],
+                        ["add", 10, "nine", "ooo"]
+                    ]
                 ]
             ]
         ]);
@@ -130,7 +137,7 @@ test('diff(obj1, obj2)', () => {
         ]
     ];
     differ.compare(data1, data2).getDiff(record => {
-         expect(record).toEqual(result);
+        expect(record).toEqual(result);
     })
-    
+
 });

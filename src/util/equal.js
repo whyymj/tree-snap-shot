@@ -2,7 +2,7 @@ import Immutable from "immutable"
 import {
     isPrimitive,
     isImmutableStructure,
-    isNull,
+    isUndefined,
     getDataType,
     getPathsNum,
     statisticListSteps,
@@ -43,16 +43,16 @@ function mapLike(obj1, obj2) {
 
     const filteKeys = {};
     obj2.map((val, key) => {
-        if (!isNull(val)) {
+        if (!isUndefined(val)) {
             filteKeys[key] = val;
-            if (isNull(obj1.get(key))) { //新增的字段
+            if (isUndefined(obj1.get(key))) { //新增的字段
                 add++
             }
         }
     })
     obj1.map((val, key) => {
-        if (!isNull(val)) {
-            if (!isNull(filteKeys[key])) { //修改字段
+        if (!isUndefined(val)) {
+            if (!isUndefined(filteKeys[key])) { //修改字段
                 if (Immutable.is(val, filteKeys[key])) { //未修改
                     unchanged += getPathsNum(val);
                 } else {

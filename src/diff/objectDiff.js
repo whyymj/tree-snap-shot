@@ -3,7 +3,7 @@ import {
 } from "../util/copy.js" //自定义的deepCopy,返回值可能是Immutable数据 
 import {
     getDataType,
-    isNull,
+    isUndefined,
 } from "../util/index.js";
 import {
     deepEqual
@@ -24,8 +24,8 @@ import Logger from '../snap-shot/index.js'
  */
 export function objectDiffHandler(obj1, obj2, path, type, handler) {
     obj2.map((val, key) => {
-        if (!isNull(val)) {
-            if (isNull(obj1.get(key))) { //新增的字段
+        if (!isUndefined(val)) {
+            if (isUndefined(obj1.get(key))) { //新增的字段
                 Logger.add({
                     path: path.push(key),
                     operation: 'add',
@@ -42,9 +42,9 @@ export function objectDiffHandler(obj1, obj2, path, type, handler) {
     obj1.map((val, key) => {
         key = key + '';
         let val2 = obj2.get(key)
-        if (!isNull(val)) {
+        if (!isUndefined(val)) {
             if (!deepEqual(val, val2)) {
-                if (!isNull(val2)) {//可能变化了的值
+                if (!isUndefined(val2)) {//可能变化了的值
                     return handler(val, val2, path.push(key), type, handler)
                 } else {//删除的字段
                     Logger.add({

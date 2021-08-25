@@ -32,7 +32,7 @@ export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
                         break;
                     }
                     let type = types[key + 1];
-                    if (type == 'object' || type == 'array') {
+                    if ((type == 'object' || type == 'array') && key < paths.length - 1) {
                         if (!child[val]) {
                             child[val] = {}
                         }
@@ -55,7 +55,7 @@ function traverse(tree, callback, path) {
     }
     for (var key in tree) {
         if (typeof tree[key] == 'object' && !Array.isArray(tree[key])) {
-            if(!tree[key]){
+            if (!tree[key]) {
                 callback(path.push(key))
                 continue;
             }

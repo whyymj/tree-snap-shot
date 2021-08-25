@@ -46,10 +46,9 @@ function getMergeFunction(key, options) {
 
 function getEnumerableOwnPropertySymbols(target) {
     return Object.getOwnPropertySymbols ?
-        Object.getOwnPropertySymbols(target).filter(function(symbol) {
+        Object.getOwnPropertySymbols(target).filter(function (symbol) {
             return target.propertyIsEnumerable(symbol)
-        }) :
-        []
+        }) : []
 }
 
 function getKeys(target) {
@@ -76,15 +75,14 @@ function propertyIsUnsafe(target, key) {
 function mergeObject(target, source, options) {
     var destination = target || {};
     if (options.isMergeableObject(target)) {
-        getKeys(target).forEach(function(key) {
+        getKeys(target).forEach(function (key) {
             destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
         });
     }
-    getKeys(source).forEach(function(key) {
+    getKeys(source).forEach(function (key) {
         if (propertyIsUnsafe(target, key)) {
             return
         }
-
         if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
             destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
         } else {
@@ -97,6 +95,8 @@ function mergeObject(target, source, options) {
 export default function deepmerge(target, source, options) {
     options = options || {};
     options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-
+    if (typeof target !== 'object' || target === null) {
+        return source
+    }
     return mergeObject(target, source, options)
 }

@@ -18,7 +18,7 @@ class CacheResult {
         return null;
     }
     size(){
-        return Object.keys(this.cache).length;
+        return Object.getOwnPropertyNames(this.cache).length;
     }
     clear() {
         this.cache = {}

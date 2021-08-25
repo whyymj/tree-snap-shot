@@ -1,7 +1,6 @@
 import {
     isPrimitive,
     getDataType,
-    reader
 } from '../util/index.js'
 import {
     shallowEqual,

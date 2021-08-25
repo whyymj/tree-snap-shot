@@ -82,8 +82,8 @@ export function getDataType(data, toJS = false) {
     return typeOf(data)
 }
 export const isObject = isObj;
-export const isNull = (data) => {
-    return data === null || data === undefined
+export const isUndefined = (data) => {
+    return data === undefined
 };
 export const isDom = (obj) => {
     if (typeof HTMLElement === 'object') {
@@ -151,12 +151,3 @@ export function statisticListSteps(arr1, arr2, list) {
     };
 }
 
-export function reader(data) {
-    try {
-        data=Immutable.fromJS(data).toJS();
-        console.log(JSON.stringify(data))
-    } catch (e) {
-        console.log(data)
-    }
-
-}

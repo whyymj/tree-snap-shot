@@ -1,8 +1,15 @@
 import Immutable from 'immutable'
+import deepmerge from '../util/merge'
 import {
     shape,
     reset
 } from './log-shaper'
+import {
+    isImmutableStructure
+} from '../util/index'
+import {
+    compare
+} from '../diff/index.js'
 class Logs {
     mergeLog = {}
     log = [];
@@ -84,41 +91,83 @@ function toString() {
         return Immutable.fromJS(item).toJS()
     }))
 }
+
+function replay(log, proto) {
+    if (Array.isArray(log)) {
+        Log.init(log)
+    } else {
+        throw new Error('请输入快照')
+    }
+
+    let childLogs;
+    let datas = []
+    let tmp;
+    for (let i = 0; i < log.length; i++) {
+        tmp = log[i];
+        if (tmp[0] == 'init') {
+            childLogs = []
+            datas.push(childLogs);
+            tmp = Immutable.fromJS(tmp).toJS()
+            if (isImmutableStructure(proto)) {
+                deepmerge(proto, tmp[1]);
+            } else {
+                proto = tmp[1]
+            }
+            tmp[1] = proto;
+        }
+        if (Array.isArray(childLogs)) {
+            childLogs.push(tmp);
+        }
+    }
+    datas.map(lg => {
+        if (typeof lg[0][1] == 'object') {
+            let data = lg[0][1];
+            if (Immutable.isImmutable(data)) {
+                data = data.toJS();
+            }
+            reset(data, Immutable.fromJS(lg).toJS())
+        }
+    })
+
+    return proto
+}
 class Logger {
+    proto = null;
     constructor() {
         Log.init()
     }
-    replay(callback, log) {
+    replay(log, proto) {
+        this.proto = replay(log, proto);
+        return this
+    }
+    rollback(log, endProto) {
+        this.reverseLog(log, endProto).exportLog(reverLog => {
+            this.replay(reverLog, endProto);
+        })
+        return this;
+    }
+    reverseLog(log, endProto) {
         if (Array.isArray(log)) {
             Log.init(log)
         } else {
-            log = Log.exportLog();
+            throw new Error('请输入快照')
         }
-
-        let childLogs;
-        let datas = []
+        if (isImmutableStructure(endProto)) {
+            deepmerge(endProto, replay(log))
+        } else {
+            endProto = replay(log);
+        }
+        let startProto;
+        let tmp;
         for (let i = 0; i < log.length; i++) {
-            if (log[i][0] == 'init') {
-                childLogs = []
-                datas.push(childLogs);
-            }
-            if (Array.isArray(childLogs)) {
-                childLogs.push(log[i]);
+            tmp = log[i];
+            if (tmp[0] == 'init') {
+                startProto = tmp[1];
+                break;
             }
         }
-        datas.map(lg=>{
-            if (typeof lg[0][1] == 'object') {
-                let data = lg[0][1];
-                if (Immutable.isImmutable(data)) {
-                    data = data.toJS();
-                }
-                let res = reset(data, Immutable.fromJS(lg).toJS())
-                typeof callback == 'function' && callback(res)
-            }else{
-                typeof callback == 'function' && callback(lg[0][1])
-            }
-        })
-        return this
+        compare(endProto, startProto)
+        return this;
     }
     getDiff(callback) { //供人查看
         let log = Log.getDiff();
