@@ -48,7 +48,7 @@ let BB = {
     ]
 }
 snapshot.compare(arr1,arr2).getDiff(df => {
-    console.log(JSON.stringify(df))//[["array",".",[["update",0,"aa"],["add",3,["+"]],["add",5,["f"]]]]]
+    console.log(JSON.stringify(df))
 })
 
 //result
