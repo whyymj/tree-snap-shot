@@ -92,6 +92,10 @@ function toString() {
     }))
 }
 
+function toJS() {
+    return Immutable.fromJS(this).toJS()
+}
+
 function replay(log, proto) {
     if (Array.isArray(log)) {
         Log.init(log)
@@ -172,6 +176,7 @@ class Logger {
     exportLog(callback) { //导出记录
         let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
+        Object.getPrototypeOf(tmp).toJS = toJS;
         typeof callback == 'function' && callback(tmp)
         return this;
     }
@@ -179,7 +184,8 @@ class Logger {
 Logger.prototype.getDiff = function (callback) { //供人查看，用不太到
     let log = Log.getDiff();
     Object.getPrototypeOf(log).toString = toString;
-    typeof callback == 'function' && callback(Immutable.fromJS(log).toJS())
+    Object.getPrototypeOf(log).toJS = toJS;
+    typeof callback == 'function' && callback(log)
     return this;
 }
 Logger.prototype.init = (data) => {
