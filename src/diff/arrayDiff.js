@@ -215,7 +215,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
         Logger.add({
             path,
             type,
-            operation: 'myers-diff',
+            operation: 'diff',
             steps: mergeOperation(diff)
         });
     } else if (arr1.length || arr1.size) {

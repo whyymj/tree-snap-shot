@@ -125,7 +125,7 @@ export function reset(data, opers) {
         }
         if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
             return restoreMap(data, oper)
-        } else if (oper[0] == 'myers-diff') {
+        } else if (oper[0] == 'diff') {
             return restoreList(data, oper)
         }
     })

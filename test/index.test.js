@@ -85,7 +85,7 @@ let data2 = {
 test(`compare(list1,list2)`, () => {
     differ.compare(li1, li2).getDiff(record => {
         expect(record).toEqual([
-            ["myers-diff", [],
+            ["diff", [],
                 [
                     ["del", 2],
                     ["update", 3, 56],
@@ -133,7 +133,7 @@ test('diff(obj1, obj2)', () => {
                 }
             }
         }],
-        ["myers-diff", ["children", 1],
+        ["diff", ["children", 1],
             [
                 ["add", 2, {
                     "id": "child3-id",
@@ -144,7 +144,7 @@ test('diff(obj1, obj2)', () => {
                 }]
             ]
         ],
-        ["myers-diff", ["children"],
+        ["diff", ["children"],
             [
                 ["update", 0, ["one", "two", 56, "five", "six", "seven7", "eight", "ten", "nine", "ooo"]]
             ]

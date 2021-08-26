@@ -21,7 +21,7 @@ class Logs {
             case 'del':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
                 return;
-            case 'myers-diff':
+            case 'diff':
                 this.log.push([log.operation, log.path, log.steps]);
                 return;
             case 'init':
