@@ -87,6 +87,15 @@ function restoreMap(data, oper) {
                     }
                 })
             })
+        } else if (oper[0] == 'replace') {
+            let child = data
+            let paths = oper[1]
+            paths.map((path, index) => {
+                if (index < paths.length - 1) {
+                    child = child[path]
+                }
+            })
+            child[paths[paths.length - 1]]=oper[2]
         }
     } else {
         throw new Error('请输入Object')
@@ -123,7 +132,7 @@ export function reset(data, opers) {
         } else if (Immutable.isImmutable(oper[1])) {
             oper[1] = Immutable.toJS(oper[1])
         }
-        if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update') {
+        if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update' || oper[0] == 'replace') {
             return restoreMap(data, oper)
         } else if (oper[0] == 'diff') {
             return restoreList(data, oper)

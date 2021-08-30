@@ -14,10 +14,21 @@ import Immutable from 'immutable'
 import {
     getDataType,
     isImmutableStructure,
+    testReader
 } from '../util/index'
 import Logger from '../snap-shot/index.js'
 import Config from '../config/index.js'
 
+
+function canGoDown(data1, data2, path) {
+    if (Config.global.maxDepth <= path.size) {
+        return false;
+    }
+    if (typeof Config.global.copyIfDiff == 'function' && Config.global.copyIfDiff(path.toJS(), Immutable.isImmutable(data1) ? data1.toJS() : data1)) {
+        return false;
+    }
+    return isImmutableStructure(data1) && isImmutableStructure(data2)
+}
 /**
  * 
  * @param {老数据} data1 
@@ -27,9 +38,12 @@ import Config from '../config/index.js'
  * @param {回调函数} handler
  * @returns void(0)
  */
-function differs(data1, data2, path, type, handler) { 
-    
-    if (isImmutableStructure(data1) && isImmutableStructure(data2)) {
+function differs(data1, data2, path, type, handler) {
+    if (typeof Config.global.ignore == 'function' && Config.global.ignore(path.toJS(), getDataType(data1, true))) {
+        return
+    }
+
+    if (canGoDown(data1, data2, path)) {
         data1 = Immutable.fromJS(data1);
         data2 = Immutable.fromJS(data2);
         if (Immutable.is(data1, data2)) {
@@ -51,7 +65,7 @@ function differs(data1, data2, path, type, handler) {
         Logger.add({
             path,
             type: type.push(getDataType(data1, true)),
-            operation: 'update',
+            operation: (isImmutableStructure(data1) && isImmutableStructure(data2)) ? 'replace' : 'update',
             value: {
                 from: deepClone(data1),
                 to: deepClone(data2),

@@ -18,6 +18,9 @@ class Logs {
         switch (log.operation) {
             case 'add':
             case 'update':
+                this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]);  
+
+                return;
             case 'del':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
                 return;
@@ -26,6 +29,9 @@ class Logs {
                 return;
             case 'init':
                 this.log.push([log.operation, log.value]);
+                return;
+            case 'replace':
+                this.log.push([log.operation, log.path, log.value.to]);
                 return;
         }
     }
@@ -68,6 +74,9 @@ class Logs {
         if (this.mergeLog.update) {
             result.unshift(['update', this.mergeLog.update])
         }
+        if (this.mergeLog.merge) {
+            result.unshift(['merge', this.mergeLog.merge])
+        }
         result.unshift(this.log[0])
         this.cache = result;
         return result;
@@ -88,7 +97,10 @@ const Log = new Logs();
 
 function toString() {
     return JSON.stringify(this.map(item => {
-        return Immutable.fromJS(item).toJS()
+        if(isImmutableStructure(item)){
+            return Immutable.fromJS(item).toJS()
+        }
+        return item
     }))
 }
 

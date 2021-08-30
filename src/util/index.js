@@ -38,12 +38,19 @@ export const isImmutable = function (value) {
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutableStructure = function (value) {
+export function isImmutableStructure(value) {
     return (
         typeof value === 'object' &&
         (Immutable.isImmutable(value) || Array.isArray(value) || isPlainObject(value))
     );
 }
+export function testReader(data) {
+    if (isImmutableStructure(data)) {
+        return Immutable.fromJS(data).toJS()
+    }
+    return data
+}
+
 /**
  * 判断是否基本数据类型
  * @param {*} value 
@@ -151,3 +158,4 @@ export function statisticListSteps(arr1, arr2, list) {
     };
 }
 
+export const toImmutable = Immutable.fromJS;

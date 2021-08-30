@@ -20,13 +20,16 @@ export const deepEqual = function (obj1, obj2) {
         return Immutable.is(obj1, obj2)
     }
 
+    if (isImmutableStructure(obj1) && isImmutableStructure(obj2)) {
+        return Immutable.is(Immutable.fromJS(obj1), Immutable.fromJS(obj2))
+    }
     if (Immutable.isImmutable(obj1)) {
         obj1 = obj1.toJS()
     }
     if (Immutable.isImmutable(obj2)) {
         obj2 = obj2.toJS()
     }
-    return config.unImmutableData.equal(obj1, obj2);
+    return typeof config.unImmutableData.equal == 'function' ? config.unImmutableData.equal(obj1, obj2) : Immutable.is(obj1, obj2);
 };
 /**
  * 浅比较两个对象是否相似
@@ -98,10 +101,10 @@ function listLike(obj1, obj2) {
     let df = myers(obj1, obj2, (a, b) => {
         if (isPrimitive(a) || isPrimitive(b)) {
             return a === b
-        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) {
-            return a.get(config.list.key) === b.get(config.list.key)
+        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.listKey) && b.get(config.listKey)) {
+            return a.get(config.listKey) === b.get(config.listKey)
         } else { //引用数据类型
-            return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
+            return similarity(a, b).similarity >= config.global.listItemSimiliarity;
         }
     })
 

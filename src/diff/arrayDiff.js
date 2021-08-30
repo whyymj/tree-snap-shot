@@ -1,10 +1,11 @@
 import {
     isPrimitive,
     getDataType,
+    testReader
 } from '../util/index.js'
 import {
     shallowEqual,
-    similarity
+    similarity,
 } from '../util/equal.js'
 import config from '../config/index.js'
 import Logger from '../snap-shot/index.js'
@@ -105,7 +106,7 @@ function getRes(snakes, stra, strb) {
 
         if (index === 0 && s !== 0) { //不变的值
             for (let j = 0; j < s; j++) {
-                args.push({//不能去掉，方便统计
+                args.push({ //不能去掉，方便统计
                     operation: '',
                     value: stra.get(j),
                     index: [j, yOffset]
@@ -134,7 +135,7 @@ function getRes(snakes, stra, strb) {
 
         // 不变
         for (let i = 0; i < e - large; i++) {
-            args.push({//不能去掉，方便统计
+            args.push({ //不能去掉，方便统计
                 operation: '',
                 value: stra.get(large + i),
                 index: [large + i, yOffset],
@@ -145,17 +146,17 @@ function getRes(snakes, stra, strb) {
     let item = null;
     let next = null;
     let newList = []
-    for (let i = 0; i < args.length; i++){
+    for (let i = 0; i < args.length; i++) {
         item = args[i];
         next = args[i + 1];
-        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1]) {//合并add del
+        if (item ?.operation == 'del' && next ?.operation == 'add' && item.index[1] == next.index[1]) { //合并add del
             newList.push({
                 operation: 'update',
-                value:next.value, 
-                index:item.index
+                value: next.value,
+                index: item.index
             });
             i++;
-        } else{
+        } else {
             newList.push(item)
         }
     }
@@ -170,7 +171,7 @@ function mergeOperation(list) {
         item = list[i];
         if (item ?.operation) {
             tmp = [item.operation, item.index[0]]
-            
+
             if (item ?.operation == 'add') {
                 if (newList[newList.length - 1] ?. [0] == 'add' && newList[newList.length - 1][1] == item.index[0]) {
                     tmp = newList[newList.length - 1]
@@ -193,25 +194,37 @@ function mergeOperation(list) {
     }
     return newList
 }
+
+function cannotGoDown(a, b, path) {
+    if (config.global.maxDepth <= path.size) {
+        return true;
+    }
+    return false
+}
+
 export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
 
     let diff = myers(arr1, arr2, (a, b) => {
+             
         if (isPrimitive(a) || isPrimitive(b)) { //简单值比较
             return a === b
-        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.list.key) && b.get(config.list.key)) { //标识字段比较
-            return a.get(config.list.key) === b.get(config.list.key)
-        } else { //引用数据类型，结构比较
-            return similarity(a, b).similarity >= config.list.mapSimilarityForDiff;
+        } else if (cannotGoDown(a, b, path)) {
+            return shallowEqual(a, b)
+        } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.listKey) && b.get(config.listKey)) { //标识字段比较
+            return a.get(config.listKey) === b.get(config.listKey)
+        } else { //引用数据类型，结构比较 
+            return similarity(a, b).similarity >= config.global.listItemSimiliarity;
         }
     })
-    if (diff.length) {
+    
+    if (diff.length) { 
         diff.forEach((item) => {
             if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
                 if (!shallowEqual(arr1.get(item.index[0]), arr2.get(item.index[1]))) {
                     return handler(arr1.get(item.index[0]), arr2.get(item.index[1]), path.push(item.index[0]), type, handler)
                 }
             }
-        }) 
+        })
         Logger.add({
             path,
             type,
@@ -221,6 +234,7 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
             if (!shallowEqual(item, arr2.get(index))) {
+                console.log(testReader(item),'<<<<++++++++',testReader(arr2.get(index)))
                 return handler(item, arr2.get(index), path.push(index), type, handler)
             }
         })
