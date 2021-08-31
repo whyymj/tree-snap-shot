@@ -84,7 +84,7 @@ let data2 = {
 
 test(`compare(list1,list2)`, () => {
     differ.compare(li1, li2).getDiff(record => {
-        expect(record).toEqual([
+        expect(record.toJS()).toEqual([
             ["diff", [],
                 [
                     ["del", 2],
@@ -125,11 +125,17 @@ test('diff(obj1, obj2)', () => {
             }
         }],
         ["del", {
-            "data": ["id", "uuu", "bb"],
+            "data": {
+                "id": null,
+                "uuu": null,
+                "bb": null
+            },
             "info": null,
             "children": {
                 "1": {
-                    "1": "testdel"
+                    "1": {
+                        "testdel": null
+                    }
                 }
             }
         }],
@@ -151,7 +157,7 @@ test('diff(obj1, obj2)', () => {
         ]
     ]
     differ.compare(data1, data2).getDiff(record => {
-        expect(record).toEqual(result);
+        expect(record.toJS()).toEqual(result);
     })
 
 });
@@ -164,15 +170,107 @@ test('diff(obj1, obj2).go() ', () => {
     }).replay(record1, test)
     expect(test).toEqual(data2);
 
-   
-}); 
-test('diff(obj1, obj2).back()', () => {
-    let record1;
-    let test = {};
-    differ.compare(data1, data2).exportLog(record => {
-        record1 = record
-    }).replay(record1, test);
-    differ.rollback(record1, test)
-    
-    expect(test).toEqual(data1);
+
+});
+test('diff(obj1, obj2) maxDepth', () => {
+
+    let AA = {
+        a: 'a',
+        b: 'b',
+        c: 'c',
+        null: null,
+        say() {},
+        child: {
+            id: 'child',
+            name: 'child',
+            tt: 0,
+            child1: {
+                id: 'child1',
+                name: 'child1-2',
+                child2: {
+                    name: 'child2',
+                    id: 'child2',
+                }
+            }
+        },
+        list: [
+            ['a', 'b', 'cc', 'de', 'e'], 1, 2, {
+                arr: [{
+                    child: 1,
+                    name: 1,
+                    id: 1
+                }, 1, 2, 3, 5, 6],
+                oo: 0,
+                aa: [1, 2, 3, 4, 5, 6, null]
+            }
+        ]
+    }
+    let map1 = new Map();
+    let map2 = new Date('2021/08/30 00:00:01');
+    let BB = {
+        a: 'a',
+        e: 'b',
+        cc: 'cc',
+        speak() {},
+        map: new Map(),
+        ii: [],
+        aa: {},
+
+        child: {
+            id: 'child',
+            name: 'child',
+            map1: map1,
+
+            child1: {
+                id: 'child1',
+                name: 'child-1',
+                child2: {
+                    name: 'child2',
+                    id: 'child1-2',
+                    map2: map2,
+                }
+            }
+        },
+        list: [
+            ['a', 'b', 'c', 'd', 'e'], 1, {}, {
+                arr: [{
+                    child: 1,
+                    name: 2,
+                    id: 1
+                }, 0, 2, 3, 5, 6],
+                aa: [1, 2, 3, 4, 5, 66, [0, 1, 2, 3, 45, 5]],
+
+            }
+        ]
+    }
+    let diffs = '';
+    let copy;
+    let diffLen = 0;
+    for (let i = 0; i < 10; i++) {
+        copy = differ.deepClone(AA).toJS();
+        differ.compare(AA, BB, {
+                maxDepth: i,
+            }).exportLog(df => {
+                diffs = df
+            })
+            .replay(diffs, copy).compare(copy, BB).getDiff(df => {
+                diffLen += df.length
+                diffLen += deepequal(copy, BB) ? 0 : 1
+            })
+    }
+
+    for (let i = 0; i < 10; i++) {
+        copy = differ.deepClone(BB).toJS();
+        differ.compare(BB, AA, {
+                maxDepth: i,
+            })
+            .exportLog(df => {
+                diffs = df
+            })
+            .replay(diffs, copy).compare(copy, AA).getDiff(df => {
+                diffLen += df.length
+                diffLen += deepequal(copy, AA) ? 0 : 1
+            })
+    }
+    expect(diffLen).toEqual(0);
 });

@@ -1,5 +1,6 @@
 import Immutable from 'immutable'
 import deepmerge from '../util/merge'
+import {testReader} from '../util/index'
 
 export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
     if (typeof data == 'object') {
@@ -19,18 +20,19 @@ export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
                     if (oper.operation == 'del' && paths.length == 1) {
                         child[val] = null;
                         break;
-                    } else if (oper.operation == 'del' && key == paths.length - 2) {
+                    } else if (oper.operation == 'del' && key == paths.length - 1) {
                         if (child[val] !== undefined) {
                             if (Array.isArray(child[val])) {
-                                child[val].push(paths[paths.length - 1])
+                                child[val].push(null)
                             } else {
-                                child[val] = [child[val], paths[paths.length - 1]]
+                                child[val] = [child[val], null]
                             }
                         } else {
-                            child[val] = paths[paths.length - 1];
+                            child[val] = null;
                         }
                         break;
                     }
+                    
                     let type = types[key + 1];
                     if ((type == 'object' || type == 'array') && key < paths.length - 1) {
                         if (!child[val]) {

@@ -39,10 +39,7 @@ function canGoDown(data1, data2, path) {
  * @returns void(0)
  */
 function differs(data1, data2, path, type, handler) {
-    if (typeof Config.global.ignore == 'function' && Config.global.ignore(path.toJS(), getDataType(data1, true))) {
-        return
-    }
-
+   
     if (canGoDown(data1, data2, path)) {
         data1 = Immutable.fromJS(data1);
         data2 = Immutable.fromJS(data2);

@@ -10,6 +10,8 @@ import {
 import {
     compare
 } from '../diff/index.js'
+
+import Config from '../config/index.js'
 class Logs {
     mergeLog = {}
     log = [];
@@ -19,7 +21,6 @@ class Logs {
             case 'add':
             case 'update':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]);  
-
                 return;
             case 'del':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
@@ -208,6 +209,9 @@ Logger.prototype.init = (data) => {
     })
 }
 Logger.prototype.add = (log) => {
+    if (typeof Config.global.ignore == 'function' && Config.global.ignore(log.path.toJS(), log.type.last())) {
+        return
+    }
     Log.push(log);
 }
 export default new Logger();
