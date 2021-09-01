@@ -27,7 +27,6 @@ let log;
 //test reset 
 snapshot.compare(obj1, obj2).exportLog(lg => {
     log = lg;//
-    console.log('>>>>>>', lg.toJS())
 }).replay(log, copyOj1)
 
 console.log(obj1, Object.getOwnPropertyNames(obj1))

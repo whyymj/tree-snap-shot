@@ -191,7 +191,6 @@ class Logger {
         let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
         Object.getPrototypeOf(tmp).toJS = toJS;
-        console.log(tmp,'<log<' )
         typeof callback == 'function' && callback(tmp)
         return this;
     }
@@ -213,7 +212,7 @@ Logger.prototype.init = (data,options) => {
 }
 Logger.prototype.add = (log) => {
     if (typeof Config.global.ignore == 'function' && Config.global.ignore(log.path.toJS(), log.type.last())) {
-        console.log('!!!',testReader(log) )
+
         return
     }
     Log.push(log);

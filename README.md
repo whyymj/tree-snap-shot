@@ -1,4 +1,4 @@
-# tree-snap-shot v1.0.0
+# tree-snap-shot
 
 
 ## Installation

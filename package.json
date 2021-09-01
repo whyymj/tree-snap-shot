@@ -52,10 +52,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/whyymj/tree-diff.git"
+    "url": "git+https://github.com/whyymj/tree-snap-shot.git"
   },
   "bugs": {
-    "url": "https://github.com/whyymj/tree-diff/issues"
+    "url": "https://github.com/whyymj/tree-snap-shot/issues"
   },
-  "homepage": "https://github.com/whyymj/tree-diff#readme"
+  "homepage": "https://github.com/whyymj/tree-snap-shot#readme"
 }
