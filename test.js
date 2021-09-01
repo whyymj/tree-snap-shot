@@ -2,16 +2,17 @@
 const immutable = require('immutable')
 const deepequal = require('deep-equal')
 const snapshot = require('./dist/index')
-
-class Vue {
-    data = 10;
-    info = '123456'
+ 
+class Test {
+    data = 1;
+    info = ''
     id = 1
     constructor(id, info, data) {
         this.id = id;
         this.data = data;
         this.info = info;
     }
+
     click() {
         console.log('id=' + this.id + ' : info=' + this.info + ' : data=' + this.data)
     }
@@ -19,27 +20,17 @@ class Vue {
         console.log('id ' + this.id + ' mounted')
     }
 }
-let obj1 = new Vue('child1', 'child1Info', 'child1Data')
-obj1.say = function () {
-    console.log('id ' + this.id + ' say')
-}
-let obj2 = new Vue('child2', 'child2Info', 'child2Data')
-obj2.say = function () {
-    console.log('id ' + this.id + ' say>>>>>' + this.info)
-}
-
+let obj1 = new Test('child1', 'child1Info', 'child1Data');
+let obj2 = new Test('child2', 'child2Info', 'child2Data');
+let copyOj1 =new Test('child1', 'child1Info', 'child1Data');
 let log;
+//test reset 
+snapshot.compare(obj1, obj2).exportLog(lg => {
+    log = lg;//
+    console.log('>>>>>>', lg.toJS())
+}).replay(log, copyOj1)
 
-snapshot.compare(obj1, obj2, {
-    ignore(...arg) {
-        
-        return arg[1]=='function'
-    }
-}).exportLog(lg => {
-    log = lg
-    console.log('>>>>>>',lg.toJS())
-}).replay(log, obj1)
-
-// console.log(obj1, Object.getOwnPropertyNames(obj1))
-obj1.say()
-console.log('over');
+console.log(obj1, Object.getOwnPropertyNames(obj1))
+// obj1.say()
+// obj1.methods.speak()
+console.log('over',obj1);
