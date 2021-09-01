@@ -1,6 +1,5 @@
 'use strict';
-import {isImmutableStructure} from './index'
-var isMergeableObject = function isMergeableObject(value) {
+export var isMergeableObject = function isMergeableObject(value) {
     return isNonNullObject(value) &&
         !isSpecial(value)
 };
@@ -24,17 +23,6 @@ var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
 function isReactElement(value) {
     return value.$$typeof === REACT_ELEMENT_TYPE
 }
-
-function emptyTarget(val) {
-    return Array.isArray(val) ? [] : {}
-}
-
-function cloneUnlessOtherwiseSpecified(value, options) {
-    return (options.clone !== false && options.isMergeableObject(value)) ?
-        deepmerge(emptyTarget(value), value, options) :
-        value
-}
-
 
 function getMergeFunction(key, options) {
     if (!options.customMerge) {
@@ -76,7 +64,7 @@ function mergeObject(target, source, options) {
     var destination = target || {};
     if (options.isMergeableObject(target)) {
         getKeys(target).forEach(function (key) {
-            destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+            destination[key] = target[key];
         });
     }
     getKeys(source).forEach(function (key) {
@@ -86,7 +74,7 @@ function mergeObject(target, source, options) {
         if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
             destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
         } else {
-            destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
+            destination[key] = source[key];
         }
     });
 
@@ -95,8 +83,8 @@ function mergeObject(target, source, options) {
 
 export default function deepmerge(target, source, options) {
     options = options || {};
-    options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-    if (typeof target !== 'object' || target === null || target === source||!isImmutableStructure(source)||!isImmutableStructure(target)) {
+    options.isMergeableObject = options.isMergeableObject || isMergeableObject; 
+    if (typeof target !== 'object' || target === null || target === source||!isMergeableObject(source)||!isMergeableObject(target)) {
         return source
     }
     return mergeObject(target, source, options)

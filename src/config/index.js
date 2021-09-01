@@ -20,7 +20,7 @@ class Config {
         this.global.listKey = options.listKey || '_id';
         this.global.listItemSimiliarity = Math.max(options.listItemSimiliarity, 0.1) || 0.6;
         this.global.copyAllIfDiff = options.copyAllIfDiff;
-        this.global.ignore= options.ignore;
+        this.global.ignore = options.ignore;
     }
 }
 export default new Config()

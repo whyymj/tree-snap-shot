@@ -41,7 +41,7 @@ export const isImmutable = function (value) {
 export function isImmutableStructure(value) {
     return (
         typeof value === 'object' &&
-        (Immutable.isImmutable(value) || Array.isArray(value) || isPlainObject(value))
+        (isImmutable(value) || Array.isArray(value) || isPlainObject(value))
     );
 }
 export function testReader(data) {

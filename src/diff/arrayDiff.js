@@ -205,10 +205,10 @@ function cannotGoDown(a, b, path) {
 export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
 
     let diff = myers(arr1, arr2, (a, b) => {
-             
+
         if (isPrimitive(a) || isPrimitive(b)) { //简单值比较
             return a === b
-        } else if (cannotGoDown(a, b, path)) {
+        } else if (cannotGoDown(a, b, path) || config.global.listItemSimiliarity >= 1) {
             return shallowEqual(a, b)
         } else if (getDataType(a) == 'Immutable Map' && getDataType(b) == 'Immutable Map' && a.get(config.listKey) && b.get(config.listKey)) { //标识字段比较
             return a.get(config.listKey) === b.get(config.listKey)
@@ -216,8 +216,8 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
             return similarity(a, b).similarity >= config.global.listItemSimiliarity;
         }
     })
-    
-    if (diff.length) { 
+
+    if (diff.length) {
         diff.forEach((item) => {
             if (!item.operation && (getDataType(item.value) == 'Immutable Map' || getDataType(item.value) == 'Immutable List')) {
                 if (!shallowEqual(arr1.get(item.index[0]), arr2.get(item.index[1]))) {
@@ -234,7 +234,6 @@ export const myersDiffHandler = function (arr1, arr2, path, type, handler) {
     } else if (arr1.length || arr1.size) {
         arr1.map((item, index) => {
             if (!shallowEqual(item, arr2.get(index))) {
-                console.log(testReader(item),'<<<<++++++++',testReader(arr2.get(index)))
                 return handler(item, arr2.get(index), path.push(index), type, handler)
             }
         })

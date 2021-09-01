@@ -1,4 +1,3 @@
-
 import config from '../config/index.js'
 import Immutable from 'immutable'
 import {
@@ -18,3 +17,21 @@ export const deepClone = function (data) {
     }
     return copy
 };
+export const linkClone = function (data, keys = []) {
+    let info = {}
+    let copyKeys;
+    if (Array.isArray(keys) && keys.length) {
+        copyKeys = keys
+    }
+    Object.getOwnPropertyNames(data || 0).forEach(item => {
+        if (copyKeys) {
+            if (copyKeys.includes(item)) {
+                info[item] = data[item];
+            }
+            
+            return;
+        }
+        info[item] = data[item];
+    })
+    return info
+}

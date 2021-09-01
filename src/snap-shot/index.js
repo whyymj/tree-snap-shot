@@ -1,11 +1,12 @@
 import Immutable from 'immutable'
-import deepmerge from '../util/merge'
+import deepmerge,{isMergeableObject} from '../util/merge'
 import {
     shape,
     reset
 } from './log-shaper'
 import {
-    isImmutableStructure
+    isImmutableStructure,
+    testReader
 } from '../util/index'
 import {
     compare
@@ -29,7 +30,7 @@ class Logs {
                 this.log.push([log.operation, log.path, log.steps]);
                 return;
             case 'init':
-                this.log.push([log.operation, log.value]);
+                this.log.push([log.operation, log.value, log.options]);
                 return;
             case 'replace':
                 this.log.push([log.operation, log.path, log.value.to]);
@@ -125,7 +126,7 @@ function replay(log, proto) {
             childLogs = []
             datas.push(childLogs);
             tmp = Immutable.fromJS(tmp).toJS()
-            if (isImmutableStructure(proto)) {
+            if (isMergeableObject(proto)) {
                 deepmerge(proto, tmp[1]);
             } else {
                 proto = tmp[1]
@@ -190,6 +191,7 @@ class Logger {
         let tmp = Log.exportLog();
         Object.getPrototypeOf(tmp).toString = toString;
         Object.getPrototypeOf(tmp).toJS = toJS;
+        console.log(tmp,'<log<' )
         typeof callback == 'function' && callback(tmp)
         return this;
     }
@@ -201,15 +203,17 @@ Logger.prototype.getDiff = function (callback) { //供人查看，用不太到
     typeof callback == 'function' && callback(log)
     return this;
 }
-Logger.prototype.init = (data) => {
+Logger.prototype.init = (data,options) => {
     Log.init()
     Log.push({
         operation: 'init',
-        value: data
+        value: data,
+        options
     })
 }
 Logger.prototype.add = (log) => {
     if (typeof Config.global.ignore == 'function' && Config.global.ignore(log.path.toJS(), log.type.last())) {
+        console.log('!!!',testReader(log) )
         return
     }
     Log.push(log);
