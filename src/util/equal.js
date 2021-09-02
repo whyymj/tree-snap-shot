@@ -130,7 +130,6 @@ function listLike(obj1, obj2) {
  * @returns 
  */
 export function similarity(obj1, obj2) {
-
     let update = 0; //obj2与obj1的差异个数，包括：修改的总个数
     let unchanged = 0; //完全相同的key：value
     if (isImmutableStructure(obj1)) { //可转为immutable结构或已经是了的数据

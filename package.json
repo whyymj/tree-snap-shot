@@ -1,6 +1,6 @@
 {
   "name": "tree-snap-shot",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "compare 2 trees differences",
   "main": "dist/index.js",
   "dependencies": {
@@ -38,7 +38,9 @@
   },
   "keywords": [
     "snap-shot",
-    "immutable"
+    "immutable",
+    "object-time-travel",
+    "compare-tree"
   ],
   "author": "wuhao",
   "license": "ISC",

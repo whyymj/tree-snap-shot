@@ -2,8 +2,12 @@ import config from '../config/index.js'
 import Immutable from 'immutable'
 import {
     isDom,
-    isPrimitive
+    isPrimitive,
+    isImmutableStructure
 } from './index'
+import {
+    isMergeableObject
+} from "./merge.js";
 export const deepClone = function (data) {
     if (isDom(data) || isPrimitive(data)) {
         return data
@@ -17,20 +21,17 @@ export const deepClone = function (data) {
     }
     return copy
 };
-export const linkClone = function (data, keys = []) {
-    let info = {}
-    let copyKeys;
-    if (Array.isArray(keys) && keys.length) {
-        copyKeys = keys
+export const linkClone = function (data) {
+    if (isImmutableStructure(data) || !isMergeableObject(data)) {
+        return data
     }
-    Object.getOwnPropertyNames(data || 0).forEach(item => {
-        if (copyKeys) {
-            if (copyKeys.includes(item)) {
-                info[item] = data[item];
-            }
-            
-            return;
-        }
+    let keys = Object.getOwnPropertyNames(data || 0);
+    if (!keys.length) {
+        return data
+    }
+    let info = {}
+
+    keys.forEach(item => {
         info[item] = data[item];
     })
     return info

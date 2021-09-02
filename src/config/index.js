@@ -12,7 +12,7 @@ class Config {
         maxDepth: 20, //最大递归深度
         ignore: null, //RegExp,Function,'',null,undefined
         copyIfDiff: null, //FUnction(path,data),Boolean
-        listKey: '_id',
+        listKey: 'id',
         listItemSimiliarity: 0.6, //[0.1,1.0]
     }
     set(options) {

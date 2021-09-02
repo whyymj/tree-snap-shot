@@ -7,9 +7,7 @@ import {
 import {
     deepEqual
 } from "../util/equal.js";
-import {
-    isMergeableObject
-} from "../util/merge.js";
+
 import {
     deepClone,
     linkClone
@@ -43,7 +41,6 @@ function canGoDown(data1, data2, path) {
  * @returns void(0)
  */
 function differs(data1, data2, path, type, handler) {
-
     if (canGoDown(data1, data2, path)) {
         data1 = Immutable.fromJS(data1);
         data2 = Immutable.fromJS(data2);
@@ -83,12 +80,8 @@ function differs(data1, data2, path, type, handler) {
  * @returns 
  */
 export function compare(data1, data2, options = {}) {
-    if (!isImmutableStructure(data1) && isMergeableObject(data1)) { //主要針對new 對象
-        data1 = linkClone(data1)
-    }
-    if (!isImmutableStructure(data2) && isMergeableObject(data2)) {
-        data2 = linkClone(data2)
-    }
+    data1 = linkClone(data1);//主要針對new 對象
+    data2 = linkClone(data2);//主要針對new 對象
     data1 = Immutable.fromJS(data1);
     Logger.init(data1, options);
     Config.set(options);
