@@ -1,19 +1,21 @@
 class Config {
-    unImmutableData = { //非常规对象的处理函数，Map,Set等immutable.js无法转化的类型
-        equal(a, b) {
-            if (typeof this.global.equal == 'function') {
-                return this.global.equal(a, b)
-            }
-            return a === b;
-        },
-        copy(data) {
-            if (typeof this.global.copy == 'function') {
-                return this.global.copy(data)
-            }
-            return data
-        },
+    constructor() {
+        let that=this;
+        this.unImmutableData = { //非常规对象的处理函数，Map,Set等immutable.js无法转化的类型
+            equal(a, b) {
+                if (typeof that.global.equal == 'function') {
+                    return that.global.equal(a, b)
+                }
+                return a === b;
+            },
+            copy(data) {
+                if (typeof that.global.copy == 'function') {
+                    return that.global.copy(data)
+                }
+                return data
+            },
+        }
     }
-
     global = {
         maxDepth: 20, //最大递归深度
         ignore: null, //RegExp,Function,'',null,undefined

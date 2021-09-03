@@ -127,12 +127,17 @@ function restoreList(data, opers = []) {
     })
 }
 
-export function reset(data, opers) {
+export function reset(data, opers, before) {
     opers.map(oper => {
         if (Immutable.isImmutable(oper)) {
             oper = Immutable.toJS(oper)
         } else if (Immutable.isImmutable(oper[1])) {
             oper[1] = Immutable.toJS(oper[1])
+        }
+        if (typeof before === 'function'&&oper[0] !== 'init') {
+            if(before(oper)===false){
+                return
+            }
         }
         if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update' || oper[0] == 'replace') {
             return restoreMap(data, oper)

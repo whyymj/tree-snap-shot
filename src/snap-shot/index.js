@@ -1,5 +1,7 @@
 import Immutable from 'immutable'
-import deepmerge,{isMergeableObject} from '../util/merge'
+import deepmerge, {
+    isMergeableObject
+} from '../util/merge'
 import {
     shape,
     reset
@@ -21,7 +23,7 @@ class Logs {
         switch (log.operation) {
             case 'add':
             case 'update':
-                this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]);  
+                this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]);
                 return;
             case 'del':
                 this.mergeLog[log.operation] = shape(this.mergeLog[log.operation], log, [log.operation]); //['add/update', deep-merge-value]
@@ -99,7 +101,7 @@ const Log = new Logs();
 
 function toString() {
     return JSON.stringify(this.map(item => {
-        if(isImmutableStructure(item)){
+        if (isImmutableStructure(item)) {
             return Immutable.fromJS(item).toJS()
         }
         return item
@@ -110,7 +112,7 @@ function toJS() {
     return Immutable.fromJS(this).toJS()
 }
 
-function replay(log, proto) {
+function replay(log, proto, before) {
     if (Array.isArray(log)) {
         Log.init(log)
     } else {
@@ -127,6 +129,9 @@ function replay(log, proto) {
             datas.push(childLogs);
             tmp = Immutable.fromJS(tmp).toJS()
             if (isMergeableObject(proto)) {
+                if (typeof before === 'function') {
+                    before(['init', tmp[1]])
+                }
                 deepmerge(proto, tmp[1]);
             } else {
                 proto = tmp[1]
@@ -138,12 +143,12 @@ function replay(log, proto) {
         }
     }
     datas.map(lg => {
-        if (typeof lg[0][1] == 'object') {
+        if (typeof lg[0][1] == 'object') {//‘init’ ，对象
             let data = lg[0][1];
             if (Immutable.isImmutable(data)) {
                 data = data.toJS();
             }
-            reset(data, Immutable.fromJS(lg).toJS())
+            reset(data, Immutable.fromJS(lg).toJS(), before)
         }
     })
 
@@ -154,8 +159,8 @@ class Logger {
     constructor() {
         Log.init()
     }
-    replay(log, proto) { //根据记录前进
-        this.proto = replay(log, proto);
+    replay(log, proto, before) { //根据记录前进
+        this.proto = replay(log, proto, before);
         return this
     }
     rollback(log, endProto) { //根据记录回退
@@ -202,7 +207,7 @@ Logger.prototype.getDiff = function (callback) { //供人查看，用不太到
     typeof callback == 'function' && callback(log)
     return this;
 }
-Logger.prototype.init = (data,options) => {
+Logger.prototype.init = (data, options) => {
     Log.init()
     Log.push({
         operation: 'init',
@@ -212,7 +217,6 @@ Logger.prototype.init = (data,options) => {
 }
 Logger.prototype.add = (log) => {
     if (typeof Config.global.ignore == 'function' && Config.global.ignore(log.path.toJS(), log.type.last())) {
-
         return
     }
     Log.push(log);

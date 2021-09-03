@@ -197,3 +197,53 @@ console.log(similarity); //{ unchanged: 3, add: 1, del: 0, update: 0, similarity
 
 数组中，如果两个children对象中有属性id，则会直接比较两者id值是否相同，而不再比较结构相似度，为了性能请添加id;
 ```
+
+In Node.js:
+
+附加功能，还原功能
+
+```js
+const snapshot = require('tree-snap-shot')
+
+let obj1 = () => ({
+    key1: 'val-1',
+    key2: 'val-2',
+    key3: 'val-3',
+    say() {}
+})
+let obj2 = {
+    key1: 'val-11',
+    key2: 'val-22',
+    key3: 'val-33',
+}
+
+let log;
+snapshot.compare(obj1(), obj2).exportLog(lg => {
+    log = lg;
+});
+
+let copy1 = obj1()
+snapshot.replay(log, copy1, oper => {
+    if (oper[0] == 'update') {
+        delete oper[1].key2;//改造这条差异还原内容
+    }
+    if(oper[0] == 'del'){
+        return false;//跳过这条差异还原
+    }
+});
+console.log(copy1);
+//result
+{ 
+    key1: 'val-11', 
+    key2: 'val-2', 
+    key3: 'val-33', 
+    say(){}
+}
+
+```
+
+
+All suggestions and opinions are welcome. 
+
+QQ:454413790
+Email: 454413790@qq.com
