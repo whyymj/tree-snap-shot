@@ -1,9 +1,15 @@
 class Config {
     unImmutableData = { //非常规对象的处理函数，Map,Set等immutable.js无法转化的类型
         equal(a, b) {
+            if (typeof this.global.equal == 'function') {
+                return this.global.equal(a, b)
+            }
             return a === b;
         },
         copy(data) {
+            if (typeof this.global.copy == 'function') {
+                return this.global.copy(data)
+            }
             return data
         },
     }
@@ -21,6 +27,8 @@ class Config {
         this.global.listItemSimiliarity = Math.max(options.listItemSimiliarity, 0.1) || 0.6;
         this.global.copyAllIfDiff = options.copyAllIfDiff;
         this.global.ignore = options.ignore;
+        this.global.copy = options.copy;
+        this.global.equal = options.equal;
     }
 }
 export default new Config()
