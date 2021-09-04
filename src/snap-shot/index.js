@@ -4,6 +4,7 @@ import deepmerge, {
 } from '../util/merge'
 import {
     shape,
+    step,
     reset
 } from './log-shaper'
 import {
@@ -118,42 +119,11 @@ function replay(log, proto, before) {
     } else {
         throw new Error('请输入快照')
     }
-
-    let childLogs;
-    let datas = [];
-    let tmp;
-    for (let i = 0; i < log.length; i++) {
-        tmp = log[i];
-        if (tmp[0] == 'init') {
-            childLogs = []
-            datas.push(childLogs);
-            tmp = Immutable.fromJS(tmp).toJS()
-            if (isMergeableObject(proto)) {
-                if (typeof before === 'function') {
-                    before(['init', tmp[1]])
-                }
-                deepmerge(proto, tmp[1]);
-            } else {
-                proto = tmp[1]
-            }
-            tmp[1] = proto;
-        }
-        if (Array.isArray(childLogs)) {
-            childLogs.push(tmp);
-        }
-    }
-    datas.map(lg => {
-        if (typeof lg[0][1] == 'object') {//‘init’ ，对象
-            let data = lg[0][1];
-            if (Immutable.isImmutable(data)) {
-                data = data.toJS();
-            }
-            reset(data, Immutable.fromJS(lg).toJS(), before)
-        }
-    })
-
+    reset(log, proto, before);
     return proto
 }
+
+
 class Logger {
     proto = null;
     constructor() {
@@ -162,6 +132,9 @@ class Logger {
     replay(log, proto, before) { //根据记录前进
         this.proto = replay(log, proto, before);
         return this
+    }
+    step(log, prototype, before) {
+        step(log, prototype, before)
     }
     rollback(log, endProto) { //根据记录回退
         this.reverseLog(log, endProto).exportLog(reverLog => {

@@ -243,6 +243,36 @@ console.log(copy1);
 ```
 
 
+In Node.js:
+
+逐步还原(1.0.8)
+
+```js
+const snapshot = require('tree-snap-shot')
+
+let obj1 ={
+    key1: 'val-1',
+    key2: 'val-2',
+    key3: 'val-3',
+}
+
+snapshot.step(['add', {
+    test: 1
+}], obj1)
+
+
+console.log(obj1);
+
+//result
+{
+  key1: 'val-1',
+  key2: 'val-2',
+  key3: 'val-3',
+  test: 1
+}
+
+```
+
 All suggestions and opinions are welcome. 
 
 QQ:454413790

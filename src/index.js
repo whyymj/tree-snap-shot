@@ -34,6 +34,7 @@ import {
         clearCache: Cache.clear,
         reverseLog: Logger.reverseLog,
         rollback: Logger.rollback,
+        step: Logger.step,
         deepClone,
         deepEqual,
         isImmutableStructure,
@@ -46,6 +47,7 @@ import {
     exports.similarity = similarity
     exports.getDiff = Logger.getDiff
     exports.replay = Logger.replay
+    exports.step = Logger.step
     exports.exportLog = Logger.exportLog
     exports.clearCache = Cache.clear
     exports.reverseLog = Logger.reverseLog

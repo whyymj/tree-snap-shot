@@ -169,9 +169,8 @@ test('diff(obj1, obj2).go() ', () => {
         record1 = record
     }).replay(record1, test)
     expect(test).toEqual(data2);
-
-
 });
+
 test('diff(obj1, obj2) maxDepth', () => {
 
     let AA = {
@@ -273,4 +272,18 @@ test('diff(obj1, obj2) maxDepth', () => {
             })
     }
     expect(diffLen).toEqual(0);
+});
+
+test('step restore', () => {
+    let obj1 ={
+        key1: 'val-1',
+        key2: 'val-2',
+        key3: 'val-3',
+    }
+    
+    differ.step(['add', {
+        test: 1
+    }], obj1)
+    
+    expect(obj1).toEqual({ key1: 'val-1', key2: 'val-2', key3: 'val-3', test: 1 });
 });

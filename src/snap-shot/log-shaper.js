@@ -1,6 +1,12 @@
 import Immutable from 'immutable'
 import deepmerge from '../util/merge'
-import {testReader} from '../util/index'
+import {
+    testReader,
+    isImmutableStructure
+} from '../util/index'
+import {
+    isMergeableObject
+} from '../util/merge'
 
 export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
     if (typeof data == 'object') {
@@ -32,7 +38,7 @@ export function shape(data = {}, operations, opers = ['add', 'update', 'del']) {
                         }
                         break;
                     }
-                    
+
                     let type = types[key + 1];
                     if ((type == 'object' || type == 'array') && key < paths.length - 1) {
                         if (!child[val]) {
@@ -97,7 +103,7 @@ function restoreMap(data, oper) {
                     child = child[path]
                 }
             })
-            child[paths[paths.length - 1]]=oper[2]
+            child[paths[paths.length - 1]] = oper[2]
         }
     } else {
         throw new Error('请输入Object')
@@ -126,24 +132,28 @@ function restoreList(data, opers = []) {
         }
     })
 }
-
-export function reset(data, opers, before) {
+export function step(oper, data, before) {
+    oper = Immutable.fromJS(oper).toJS()
+    if (typeof before === 'function') {
+        if (before(oper) === false) {
+            return
+        }
+    }
+    if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update' || oper[0] == 'replace') {
+        return restoreMap(data, oper)
+    } else if (oper[0] == 'diff') {
+        return restoreList(data, oper)
+    } else if (oper[0] == 'init') {
+        if (isMergeableObject(data)) {
+            return deepmerge(data, oper[1]);
+        } else {
+            throw new Error('target must be a mergeable object')
+        }
+    }
+}
+export function reset(opers, data, before) {
     opers.map(oper => {
-        if (Immutable.isImmutable(oper)) {
-            oper = Immutable.toJS(oper)
-        } else if (Immutable.isImmutable(oper[1])) {
-            oper[1] = Immutable.toJS(oper[1])
-        }
-        if (typeof before === 'function'&&oper[0] !== 'init') {
-            if(before(oper)===false){
-                return
-            }
-        }
-        if (oper[0] == 'add' || oper[0] == 'del' || oper[0] == 'update' || oper[0] == 'replace') {
-            return restoreMap(data, oper)
-        } else if (oper[0] == 'diff') {
-            return restoreList(data, oper)
-        }
+        step(oper, data, before)
     })
     return data
 }
