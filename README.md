@@ -1,16 +1,18 @@
 # tree-snap-shot
-简单对象（JSON.stringify/parse能够顺利还原的对象）的对比功能；
+
+Comparison function of simple objects (objects that can be successfully restored by JSON.stringify/parse);
 
 ## Installation
 
 Using npm:
+
 ```shell
 $ npm i --save tree-snap-shot
 ```
 
 In Node.js:
 
-数组的对比参考了git的diff算法；
+The comparison of arrays refers to the diff algorithm of git;
 
 ```js
 const snapshot = require('tree-snap-shot')
@@ -31,7 +33,7 @@ snapshot.compare(arr1,arr2).getDiff(df => {
 
 In Node.js:
 
-对象的对比是object与array分别对比；
+compare object and array respectively
 
 ```js
 const snapshot = require('tree-snap-shot')
@@ -70,44 +72,8 @@ snapshot.compare(AA,BB).getDiff(df => {
 
 In Node.js:
 
-这里只是一个 **不恰当** 的例子，目前插件只支持普通对象（能够JSON.stringify/.parse的对象，Immutable.js能够处理的对象）；对于new Class创建的对象以及对象内包含 **循环引用** 的暂不支持；
+Here is a display of the relatively complete function
 
-```js
-const snapshot = require('tree-snap-shot')
-class Test {
-    data = 1;
-    info = ''
-    id = 1
-    constructor(id, info, data) {
-        this.id = id;
-        this.data = data;
-        this.info = info;
-    }
-
-    click() {
-        console.log('id=' + this.id + ' : info=' + this.info + ' : data=' + this.data)
-    }
-    mounted() {
-        console.log('id ' + this.id + ' mounted')
-    }
-}
-let obj1 = new Test('child1', 'child1 Info', 'child1 Data');
-let obj2 = new Test('child2', 'child2 Info', 'child2 Data');
-let copyOj1 =new Test('child1', 'child1 Info', 'child1 Data');//Test { data: 'child1 Data', info: 'child1 Info', id: 'child1' }
-let log;
-//test reset 
-snapshot.compare(obj1, obj2).exportLog(lg => {
-    log = lg;//保存对比差异
-}).replay(log, copyOj1);//根据对比差异，改造对象
-
-console.log(copyOj1);//Test { data: 'child2 Data', info: 'child2 Info', id: 'child2' }
-
-```
-
-
-In Node.js:
-
-这里是一个比较完整的功能展示
 
 ```js
 const snapshot = require('tree-snap-shot')
@@ -134,17 +100,17 @@ let obj2 = {
     name: 'obj2',
     pA: 'pA',
     children: [
-        0, //添加了一项
+        0, //add
         {
             name: 'child1',
             cA: 'cA',
             cB: 'cB',
-            add: 'add',//添加了一个属性
+            add: 'add',//add
         }, {
             name: 'child2',
             cA: 'cA',
             cB: 'cB'
-        }, {//修改了两个属性
+        }, {//changed
             name: 'child3',
             cAA: 'cAA',
             cBB: 'cBB'
@@ -161,9 +127,10 @@ snapshot.compare(obj1, obj2).getDiff(df => {
     }],
     ["add", {
         "children": { 
-		//children[0]中的一个参数被替换了,但是前后改动不大，相似度similarity:0.75;
+		//A parameter in children [0] is replaced, and the similarity is 0.75;
+
             "0": {
-                "add": "add"//认为他只是原对象移位后添加了一个属性值add；
+                "add": "add"//It is considered that we only add an attribute 'add' after the original object is shifted;
             }
         }
     }],
@@ -171,7 +138,7 @@ snapshot.compare(obj1, obj2).getDiff(df => {
         [
             ["add", 0, 0],
             ["update", 2,
-			 //对于children[2]来说改动了大部分的属性，不如当做整体被替换了；这里默认前后两个对象相似程度0.6为替换判断的分界线
+			 //For children [2], most attributes have been changed, we can say that the whole is replaced with a new one; Here, the default similarity of the two objects is 0.6, which is the dividing line of the replacement judgment
 			{
                 "name": "child3",
                 "cAA": "cA",
@@ -181,7 +148,7 @@ snapshot.compare(obj1, obj2).getDiff(df => {
     ]
 ]
 
-**这里是上面相似度判断的一个例子**
+**Here is an example of the above similarity judgment**
 //snapshot.similarity(obj1.children[0] , obj2.children[1])
 let similarity = snapshot.similarity({
     name: 'child1',
@@ -195,12 +162,12 @@ let similarity = snapshot.similarity({
 });
 console.log(similarity); //{ unchanged: 3, add: 1, del: 0, update: 0, similarity: 0.75 }
 
-数组中，如果两个children对象中有属性id，则会直接比较两者id值是否相同，而不再比较结构相似度，为了性能请添加id;
+In the array, if there is an attribute ID in two children objects, it will directly compare whether the two ID values are the same, instead of comparing the structural similarity. Please add ID for better performance;
 ```
 
 In Node.js:
 
-附加功能，还原功能
+restore function
 
 ```js
 const snapshot = require('tree-snap-shot')
@@ -225,10 +192,11 @@ snapshot.compare(obj1(), obj2).exportLog(lg => {
 let copy1 = obj1()
 snapshot.replay(log, copy1, oper => {
     if (oper[0] == 'update') {
-        delete oper[1].key2;//改造这条差异还原内容
+        delete oper[1].key2;//modify operation content
+
     }
     if(oper[0] == 'del'){
-        return false;//跳过这条差异还原
+        return false;//skip this step
     }
 });
 console.log(copy1);
@@ -245,7 +213,7 @@ console.log(copy1);
 
 In Node.js:
 
-逐步还原(1.0.8)
+step-wise restore(1.0.8)
 
 ```js
 const snapshot = require('tree-snap-shot')
