@@ -82,8 +82,12 @@ function mergeObject(target, source, options) {
 }
 
 export default function deepmerge(target, source, options) {
+    if(source===undefined){
+        return target;
+    }
     options = options || {};
     options.isMergeableObject = options.isMergeableObject || isMergeableObject; 
+    
     if (typeof target !== 'object' || target === null || target === source||!isMergeableObject(source)||!isMergeableObject(target)) {
         return source
     }

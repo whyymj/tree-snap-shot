@@ -241,6 +241,49 @@ console.log(obj1);
 
 ```
 
+filte tree1 with filter
+
+```js
+let tree1 = {
+    1: [0, 1, 2, 3],
+    2: 2,
+    3: 3,
+    list: [{
+        id: 1
+    }, {}]
+}
+
+let filter = {
+    1: {
+        2: null,//null means fuzzy matching
+    },
+    2: null,
+    4: null,
+    list: {
+        0: null
+    }
+}
+
+
+
+console.log(snapshot.difference(tree1, filter));//tree1 remove public parts
+
+//result
+{
+  '1': [ 0, 1, undefined, 3 ],
+  '3': 3,
+  list: [ undefined , {} ]
+}
+
+console.log(snapshot.union(tree1, filter));//get public parts between tree1 and filter
+
+//result
+{ '1': [ undefined, undefined, 2 ], '2': 2, list: [ { id: 1 } ] }
+
+```
+
+
+
 All suggestions and opinions are welcome. 
 
 QQ:454413790
