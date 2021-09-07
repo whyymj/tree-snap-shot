@@ -9,7 +9,9 @@ import {
 } from './util/equal'
 import {
     deepClone,
-    conditionalGraft
+    conditionalGraft,
+    union,
+    difference,
 } from './util/copy'
 import Cache from './cache/index.js'
 import {
@@ -42,7 +44,9 @@ import {
         isImmutable,
         isPrimitive,
         toImmutable,
-        conditionalGraft
+        conditionalGraft,
+        union,
+        difference,
     }
     exports.default = TreeDiff;
     exports.compare = compare
@@ -61,4 +65,6 @@ import {
     exports.isPrimitive = isPrimitive
     exports.toImmutable = toImmutable
     exports.conditionalGraft = conditionalGraft
+    exports.union = union
+    exports.difference = difference
 })))
