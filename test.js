@@ -25,9 +25,9 @@ let filter = {
 
 
 
-console.log(snapshot.difference(tree1, filter));//tree1 remove public parts
+console.log(JSON.stringify(snapshot.difference(tree1, filter)));//tree1 remove public parts
 
  
-console.log(snapshot.union(tree1, filter));//get public parts between tree1 and filter
+console.log(JSON.stringify(snapshot.union(tree1, filter)));//get public parts between tree1 and filter
 
 //result

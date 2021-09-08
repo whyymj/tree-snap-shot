@@ -25,7 +25,7 @@ function reunion(tree, paths, values) {
             child = children.get(idx);
 
             if (idx === path.size - 1) {
-                tmp[p] = deepClone(child,true)
+                tmp[p] = deepClone(child, true)
             } else if (tmp[p] === undefined) {
                 if (isObject(child)) {
                     tmp = tmp[p] = {}
@@ -39,16 +39,22 @@ function reunion(tree, paths, values) {
     })
     return copy
 }
+
+function toJS(data) {
+    if (Immutable.isImmutable(data)) {
+        return data.toJS()
+    }
+    return data
+}
 //交集
 export function union(tree, obj2) {
-    if (typeof tree !== 'object') {
+    if (!isImmutableStructure(tree) || !isImmutableStructure(obj2)) {
         return tree
     }
     let paths = []
     let values = []
-    if (typeof obj2 !== 'object') {
-        return tree
-    }
+    tree = toJS(tree);
+    obj2 = toJS(obj2);
 
     function traverse(tree, filter, path, value) {
         if (!path) {
@@ -81,14 +87,13 @@ export function union(tree, obj2) {
 }
 //差集
 export function difference(tree, obj2) {
-    if (typeof tree !== 'object') {
+    if (!isImmutableStructure(tree) || !isImmutableStructure(obj2)) {
         return tree
     }
     let paths = []
     let values = []
-    if (typeof obj2 !== 'object') {
-        return tree
-    }
+    tree = toJS(tree);
+    obj2 = toJS(obj2);
 
     function traverse(tree, filter, path, value) {
         if (!path) {
@@ -126,6 +131,8 @@ export function conditionalGraft(tree, filter, deepcopy = false) {
     }
     let paths = []
     let values = []
+    tree = toJS(tree);
+
     if (typeof filter !== 'function') {
         return tree
     }
@@ -153,7 +160,6 @@ export function conditionalGraft(tree, filter, deepcopy = false) {
             }
         }
     }
-
     traverse(tree);
     return reunion(tree, paths, values)
 }
