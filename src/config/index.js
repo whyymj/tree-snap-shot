@@ -17,11 +17,12 @@ class Config {
         }
     }
     global = {
-        maxDepth: 20, //最大递归深度
+        maxDepth: 100, //最大递归深度
         ignore: null, //RegExp,Function,'',null,undefined
         copyIfDiff: null, //FUnction(path,data),Boolean
         listKey: 'id',
         listItemSimiliarity: 0.6, //[0.1,1.0]
+        cacheSurvivalTime:1000,
     }
     set(options) {
         this.global.maxDepth = (options.maxDepth ? parseInt(options.maxDepth) : 20) || 20;

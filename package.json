@@ -1,6 +1,6 @@
 {
   "name": "tree-snap-shot",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "compare 2 trees differences",
   "main": "dist/index.js",
   "dependencies": {

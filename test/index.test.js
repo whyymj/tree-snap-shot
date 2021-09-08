@@ -275,15 +275,68 @@ test('diff(obj1, obj2) maxDepth', () => {
 });
 
 test('step restore', () => {
-    let obj1 ={
+    let obj1 = {
         key1: 'val-1',
         key2: 'val-2',
         key3: 'val-3',
     }
-    
+
     differ.step(['add', {
         test: 1
     }], obj1)
-    
-    expect(obj1).toEqual({ key1: 'val-1', key2: 'val-2', key3: 'val-3', test: 1 });
+
+    expect(obj1).toEqual({
+        key1: 'val-1',
+        key2: 'val-2',
+        key3: 'val-3',
+        test: 1
+    });
+});
+
+test('union two tree to get common part', () => {
+    let tree1 = {
+        1: [0, 1, 2, 3],
+        2: 2,
+        3: 3,
+        list: [{
+            id: 1
+        }, {}]
+    }
+
+    let filter = {
+        1: {
+            2: null, //null means fuzzy matching
+        },
+        2: null,
+        4: null,
+        list: {
+            0: null
+        }
+    }
+
+    expect(JSON.stringify(differ.union(tree1, filter))).toEqual('{"1":[null,null,2],"2":2,"list":[{"id":1}]}');
+});
+
+test('differ two tree to get left tree unique part', () => {
+    let tree1 = {
+        1: [0, 1, 2, 3],
+        2: 2,
+        3: 3,
+        list: [{
+            id: 1
+        }, {}]
+    }
+
+    let filter = {
+        1: {
+            2: null, //null means fuzzy matching
+        },
+        2: null,
+        4: null,
+        list: {
+            0: null
+        }
+    }
+
+    expect(JSON.stringify(differ.difference(tree1, filter))).toEqual('{"1":[0,1,null,3],"3":3,"list":[null,{}]}');
 });

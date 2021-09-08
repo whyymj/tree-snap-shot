@@ -20,6 +20,7 @@ import {
 } from '../util/index'
 import Logger from '../snap-shot/index.js'
 import Config from '../config/index.js'
+import Cache from '../cache/index.js'
 
 
 function canGoDown(data1, data2, path) {
@@ -84,6 +85,7 @@ export function compare(data1, data2, options = {}) {
     data2 = linkClone(data2);//主要針對new 對象
     data1 = Immutable.fromJS(data1);
     Logger.init(data1, options);
+    Cache.start();
     Config.set(options);
 
     differs(data1, Immutable.fromJS(data2), Immutable.List([]), Immutable.List([]), differs);

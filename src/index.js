@@ -20,6 +20,11 @@ import {
     isPrimitive,
     toImmutable,
 } from './util/index'
+
+function similar(d1, d2) {
+    Cache.start()
+    return similarity(d1, d2)
+}
 /**
  * 全局挂载
  */
@@ -30,7 +35,7 @@ import {
 }(this, (function (exports) {
     var TreeDiff = {
         compare,
-        similarity,
+        similarity: similar,
         getDiff: Logger.getDiff,
         replay: Logger.replay,
         exportLog: Logger.exportLog,
@@ -50,7 +55,7 @@ import {
     }
     exports.default = TreeDiff;
     exports.compare = compare
-    exports.similarity = similarity
+    exports.similarity = similar
     exports.getDiff = Logger.getDiff
     exports.replay = Logger.replay
     exports.step = Logger.step
