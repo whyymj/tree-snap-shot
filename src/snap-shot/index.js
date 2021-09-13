@@ -116,6 +116,8 @@ function toJS() {
 function replay(log, proto, before) {
     if (Array.isArray(log)) {
         Log.init(log)
+    }else if(Immutable.isList(log)){
+        log=log.toArray()
     } else {
         throw new Error('请输入快照')
     }
@@ -145,7 +147,9 @@ class Logger {
     reverseLog(log, endProto) { //反转log
         if (Array.isArray(log)) {
             Log.init(log)
-        } else {
+        } else if(Immutable.isList(log)){
+            log=log.toArray()
+        }else {
             throw new Error('请输入快照')
         }
         if (isImmutableStructure(endProto)) {

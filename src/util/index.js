@@ -32,12 +32,6 @@ function isPlainObject(value) {
 /**
  * 判断是否是immutable数据或是可以转化为immutable的数据
  */
-export const isImmutable = function (value) {
-    return Immutable.isImmutable(value)
-}
-/**
- * 判断是否是immutable数据或是可以转化为immutable的数据
- */
 export function isImmutableStructure(value) {
     return (
         typeof value === 'object' &&
@@ -159,3 +153,6 @@ export function statisticListSteps(arr1, arr2, list) {
 }
 
 export const toImmutable = Immutable.fromJS;
+export const toJS = Immutable.toJS;
+export const fromJS = Immutable.fromJS;
+export const isImmutable = Immutable.isImmutable;

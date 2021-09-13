@@ -19,6 +19,8 @@ import {
     isImmutable,
     isPrimitive,
     toImmutable,
+    fromJS,
+    toJS
 } from './util/index'
 
 function similar(d1, d2) {
@@ -52,6 +54,8 @@ function similar(d1, d2) {
         conditionalGraft,
         union,
         difference,
+        toJS,
+        fromJS,
     }
     exports.default = TreeDiff;
     exports.compare = compare
@@ -72,4 +76,6 @@ function similar(d1, d2) {
     exports.conditionalGraft = conditionalGraft
     exports.union = union
     exports.difference = difference
+    exports.toJS = toJS
+    exports.fromJS = fromJS
 })))

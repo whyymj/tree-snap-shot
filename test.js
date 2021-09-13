@@ -14,7 +14,7 @@ let tree1 = {
 
 let filter = {
     1: {
-        2: null,//null means fuzzy matching
+        2: null, //null means fuzzy matching
     },
     2: null,
     4: null,
@@ -22,12 +22,13 @@ let filter = {
         0: null
     }
 }
+let li=Immutable.fromJS([0, 1, 2])
+console.log(Immutable.isList(li),'...,',li.toArray())
 
 
+console.log(JSON.stringify(snapshot.difference(tree1, filter))); //tree1 remove public parts
 
-console.log(JSON.stringify(snapshot.difference(tree1, filter)));//tree1 remove public parts
 
- 
-console.log(JSON.stringify(snapshot.union(tree1, filter)));//get public parts between tree1 and filter
+console.log(JSON.stringify(snapshot.union(tree1, filter))); //get public parts between tree1 and filter
 
 //result
