@@ -100,10 +100,16 @@ function restoreMap(data, oper) {
             let paths = oper[1]
             paths.map((path, index) => {
                 if (index < paths.length - 1) {
-                    child = child[path]
+                    if(typeof child=='object'&&child){
+                        child = child[path]
+                    }
                 }
             })
-            child[paths[paths.length - 1]] = oper[2]
+            if(typeof child=='object'&&child){
+                child[paths[paths.length - 1]] = oper[2]
+            }else{
+                throw new Error('not existed path : ', paths)
+            }
         }
     } else {
         throw new Error('请输入Object')

@@ -24,6 +24,7 @@ snapshot.compare(arr1,arr2).getDiff(df => {
 })
 
 //result
+
 [["diff",[],[
     ["update",0,"aa"],
     ["add",3,"+"],
@@ -59,6 +60,12 @@ snapshot.compare(AA,BB).getDiff(df => {
 })
 
 //result
+//'add' means the these fields are new added;
+//'update' means the these fields' values have been updated;
+//'del' means the these fields have been deleted;
+
+//['diff',[path to the list],[operations]]
+
 [["add",{"e":"b","cc":"cc"}],
 ["del",{"b":null,"c":null}],
 ["diff",["list",0],[
